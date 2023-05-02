@@ -5,4 +5,4 @@ description: Plugin to automate updating of both Geyser and Floodgate
 author: 'NewAmazingPVP'
 softdepend:
   - Geyser-spigot
-  - Floodgate-spigot
+  - Floodgate

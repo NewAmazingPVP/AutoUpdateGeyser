@@ -26,7 +26,6 @@ public final class AutoUpdateGeyser extends JavaPlugin {
         config.addDefault("updates.floodgate", false);
         config.addDefault("updates.interval", 60);
 
-
         config.options().copyDefaults(true);
         saveConfig();
 

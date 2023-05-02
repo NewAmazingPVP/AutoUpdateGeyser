@@ -7,9 +7,7 @@ import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
 
@@ -17,43 +15,15 @@ public final class AutoUpdateGeyser extends Plugin {
 
     private Geyser m_geyser;
     private Floodgate m_floodgate;
+    private Configuration config;
 
     @Override
     public void onEnable() {
         m_geyser = new Geyser();
         m_floodgate = new Floodgate();
 
-        File configFile = new File(getDataFolder(), "config.yml");
-        if (!configFile.exists()) {
-            configFile.getParentFile().mkdirs();
-            try (InputStream in = getClass().getResourceAsStream("/config.yml")) {
-                Files.copy(in, configFile.toPath());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        Configuration config = null;
-        try {
-            config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(configFile);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        if (!config.contains("updates.geyser")) {
-            config.set("updates.geyser", true);
-        }
-        if (!config.contains("updates.floodgate")) {
-            config.set("updates.floodgate", false);
-        }
-        if (!config.contains("updates.interval")) {
-            config.set("updates.interval", 60);
-        }
-
-        try {
-            ConfigurationProvider.getProvider(YamlConfiguration.class).save(config, configFile);
-        } catch (IOException ignored) {
-        }
+        saveDefaultConfig();
+        loadConfiguration();
         updateChecker();
     }
 
@@ -64,5 +34,35 @@ public final class AutoUpdateGeyser extends Plugin {
         }, 20L, 60L, TimeUnit.SECONDS);
     }
 
+    private void saveDefaultConfig() {
+        File file = new File(getDataFolder(), "config.yml");
+        if (!file.exists()) {
+            file.getParentFile().mkdirs();
+            try (InputStream in = getClass().getResourceAsStream("/config.yml")) {
+                Files.copy(in, file.toPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    private void loadConfiguration() {
+        File file = new File(getDataFolder(), "config.yml");
+        try {
+            config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
+            if (!config.contains("updates.geyser")) {
+                config.set("updates.geyser", true);
+                saveConfiguration(file);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    private void saveConfiguration(File file) {
+        try {
+            ConfigurationProvider.getProvider(YamlConfiguration.class).save(config, file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
