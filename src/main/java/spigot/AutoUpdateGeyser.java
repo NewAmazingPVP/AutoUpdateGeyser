@@ -4,50 +4,52 @@ import common.Floodgate;
 import common.Geyser;
 
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.Bukkit;
-import java.io.File;
-import java.io.IOException;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 public final class AutoUpdateGeyser extends JavaPlugin {
 
     private Geyser m_geyser;
     private Floodgate m_floodgate;
-    private FileConfiguration config;
 
     @Override
     public void onEnable() {
         m_geyser = new Geyser();
         m_floodgate = new Floodgate();
-        config = getConfig();
 
-        if (!getDataFolder().exists()) {
-            getDataFolder().mkdir();
-        }
-        File file = new File(getDataFolder(), "config.yml");
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
+        saveDefaultConfig();
 
-                FileConfiguration configuration = YamlConfiguration.loadConfiguration(file);
+        FileConfiguration config = getConfig();
 
-                configuration.set("Geyser.enabled", true);
-                configuration.set("Geyser.dev", false);
-                configuration.set("Floodgate.enabled", true);
-                configuration.set("Floodgate.dev", false);
-                configuration.set("Check-Interval", 30);
+        config.addDefault("updates.geyser", true);
+        config.addDefault("updates.floodgate", false);
+        config.addDefault("updates.interval", 60);
 
-                configuration.save(file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+
+        config.options().copyDefaults(true);
+        saveConfig();
 
         updateChecker();
     }
 
     public void updateChecker() {
+        Plugin ifGeyser = Bukkit.getPluginManager().getPlugin("Geyser-spigot");
+        Plugin ifFloodgate = Bukkit.getPluginManager().getPlugin("Floodgate");
+        if(ifGeyser == null || ifFloodgate == null)
+        {
+            if(ifGeyser == null){
+                getLogger().info("Geyser was not installed therefore installing it now");
+            } else if(ifFloodgate == null)
+            {
+                getLogger().info("Floodgate was not installed therefore installing it now");
+            }
+
+        }
+        else {
+            getLogger().info("Geyser was found!");
+        }
+
         Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
             @Override
             public void run() {
@@ -56,14 +58,4 @@ public final class AutoUpdateGeyser extends JavaPlugin {
         }, 300L, 20L * 60L * 2);
     }
 
-    public FileConfiguration getConfig() {
-        try {
-            File configFile = new File(getDataFolder(), "config.yml");
-            FileConfiguration configuration = YamlConfiguration.loadConfiguration(configFile);
-            return configuration;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 }

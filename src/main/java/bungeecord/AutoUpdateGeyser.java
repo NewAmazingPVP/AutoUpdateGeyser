@@ -9,62 +9,60 @@ import net.md_5.bungee.config.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
 
 public final class AutoUpdateGeyser extends Plugin {
 
     private Geyser m_geyser;
-    private Configuration config;
     private Floodgate m_floodgate;
 
     @Override
     public void onEnable() {
         m_geyser = new Geyser();
         m_floodgate = new Floodgate();
-        config = getConfig();
 
-        if (!getDataFolder().exists()) {
-            getDataFolder().mkdir();
-        }
-        File file = new File(getDataFolder(), "config.yml");
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-
-                Configuration configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
-
-                configuration.set("Geyser.enabled", true);
-                configuration.set("Geyser.dev", false);
-                configuration.set("Floodgate.enabled", true);
-                configuration.set("Floodgate.dev", false);
-                configuration.set("Check-Interval", 30);
-
-                ConfigurationProvider.getProvider(YamlConfiguration.class).save(configuration, file);
+        File configFile = new File(getDataFolder(), "config.yml");
+        if (!configFile.exists()) {
+            configFile.getParentFile().mkdirs();
+            try (InputStream in = getClass().getResourceAsStream("/config.yml")) {
+                Files.copy(in, configFile.toPath());
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
+        Configuration config = null;
+        try {
+            config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(configFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (!config.contains("updates.geyser")) {
+            config.set("updates.geyser", true);
+        }
+        if (!config.contains("updates.floodgate")) {
+            config.set("updates.floodgate", false);
+        }
+        if (!config.contains("updates.interval")) {
+            config.set("updates.interval", 60);
+        }
+
+        try {
+            ConfigurationProvider.getProvider(YamlConfiguration.class).save(config, configFile);
+        } catch (IOException ignored) {
+        }
         updateChecker();
     }
 
     public void updateChecker() {
-        getProxy().getScheduler().schedule(this, new Runnable() {
-            @Override
-            public void run() {
-                m_geyser.updateGeyser("bungeecord");
-                m_floodgate.updateFloodgate("bungeecord");
-            }
+        getProxy().getScheduler().schedule(this, () -> {
+            m_geyser.updateGeyser("bungeecord");
+            m_floodgate.updateFloodgate("bungee");
         }, 20L, 60L, TimeUnit.SECONDS);
     }
 
-    public Configuration getConfig() {
-        try {
-            File configFile = new File(getDataFolder(), "config.yml");
-            return ConfigurationProvider.getProvider(YamlConfiguration.class).load(configFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+
 }
