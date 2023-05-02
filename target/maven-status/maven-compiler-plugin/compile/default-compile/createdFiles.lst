@@ -1,3 +1,6 @@
-newamazingpvp\autoupdategeyser\AutoUpdateGeyser$1.class
-newamazingpvp\autoupdategeyser\AutoUpdateGeyser.class
-newamazingpvp\autoupdategeyser\Geyser.class
+common\Floodgate.class
+bungeecord\AutoUpdateGeyser$1.class
+spigot\AutoUpdateGeyser.class
+bungeecord\AutoUpdateGeyser.class
+spigot\AutoUpdateGeyser$1.class
+common\Geyser.class

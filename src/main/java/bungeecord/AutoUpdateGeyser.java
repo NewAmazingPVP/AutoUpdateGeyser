@@ -1,5 +1,7 @@
-package newamazingpvp.autoupdategeyser;
+package bungeecord;
 
+import common.Floodgate;
+import common.Geyser;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -13,10 +15,12 @@ public final class AutoUpdateGeyser extends Plugin {
 
     private Geyser m_geyser;
     private Configuration config;
+    private Floodgate m_floodgate;
 
     @Override
     public void onEnable() {
         m_geyser = new Geyser();
+        m_floodgate = new Floodgate();
         config = getConfig();
 
         if (!getDataFolder().exists()) {
@@ -48,9 +52,10 @@ public final class AutoUpdateGeyser extends Plugin {
         getProxy().getScheduler().schedule(this, new Runnable() {
             @Override
             public void run() {
-                m_geyser.updateGeyser();
+                m_geyser.updateGeyser("bungeecord");
+                m_floodgate.updateFloodgate("bungeecord");
             }
-        }, 1L, 1L, TimeUnit.MINUTES);
+        }, 20L, 60L, TimeUnit.SECONDS);
     }
 
     public Configuration getConfig() {

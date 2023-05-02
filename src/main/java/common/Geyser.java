@@ -1,4 +1,4 @@
-package newamazingpvp.autoupdategeyser;
+package common;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -7,10 +7,10 @@ import java.net.URL;
 
 public class Geyser {
 
-    public void updateGeyser() {
+    public void updateGeyser(String platform) {
         String latestVersionUrl;
-        latestVersionUrl = "https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/bungeecord";
-        String outputFilePath = "plugins/Geyser-BungeeCord.jar";
+        latestVersionUrl = "https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/" + platform;
+        String outputFilePath = "plugins/Geyser-" + platform + ".jar";
 
         try (InputStream in = new URL(latestVersionUrl).openStream();
              FileOutputStream out = new FileOutputStream(outputFilePath)) {
