@@ -3,6 +3,3 @@ version: '1.0'
 main: newamazingpvp.autoupdategeyser.AutoUpdateGeyser
 author: NewAmazingPVP
 description: Plugin to automate updating of both Geyser and Floodgate
-softDepends:
-  - Geyser
-  - Floodgate
