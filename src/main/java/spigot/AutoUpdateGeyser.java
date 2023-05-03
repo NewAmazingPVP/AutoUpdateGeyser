@@ -3,6 +3,7 @@ package spigot;
 import common.Floodgate;
 import common.Geyser;
 
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -38,23 +39,23 @@ public final class AutoUpdateGeyser extends JavaPlugin {
         if(ifGeyser == null || ifFloodgate == null)
         {
             if(ifGeyser == null){
-                getLogger().info("Geyser was not installed therefore installing it now");
+                m_geyser.updateGeyser("spigot");
+                getLogger().info(ChatColor.GREEN + "Geyser has been installed for the first time." + ChatColor.YELLOW + " Please restart the serve again to let it take in effect.");
             } else if(ifFloodgate == null)
             {
-                getLogger().info("Floodgate was not installed therefore installing it now");
+                m_floodgate.updateFloodgate("spigot");
+                getLogger().info(ChatColor.GREEN + "Floodgate has been installed for the first time." + ChatColor.YELLOW + " Please restart the serve again to let it take in effect.");
             }
 
         }
-        else {
-            getLogger().info("Geyser was found!");
-        }
 
+        int interval = getConfig().getInt("updates.interval");
         Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
             @Override
             public void run() {
                 m_geyser.updateGeyser("spigot");
                 m_floodgate.updateFloodgate("spigot");}
-        }, 300L, 20L * 60L * 2);
+        }, 300L, 20L * 60L * interval);
     }
 
 }

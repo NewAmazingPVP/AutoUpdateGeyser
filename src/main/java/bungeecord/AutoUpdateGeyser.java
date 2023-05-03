@@ -6,6 +6,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
+import org.bukkit.ChatColor;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -28,10 +29,29 @@ public final class AutoUpdateGeyser extends Plugin {
     }
 
     public void updateChecker() {
+        Plugin ifGeyser = getProxy().getPluginManager().getPlugin("Geyser-spigot");
+        Plugin ifFloodgate = getProxy().getPluginManager().getPlugin("Floodgate");
+        if(ifGeyser == null || ifFloodgate == null)
+        {
+            if(ifGeyser == null){
+                m_geyser.updateGeyser("spigot");
+                getLogger().info(ChatColor.GREEN + "Geyser has been installed for the first time." + ChatColor.YELLOW + " Please restart the serve again to let it take in effect.");
+            } else if(ifFloodgate == null)
+            {
+                m_floodgate.updateFloodgate("spigot");
+                getLogger().info(ChatColor.GREEN + "Floodgate has been installed for the first time." + ChatColor.YELLOW + " Please restart the serve again to let it take in effect.");
+            }
+
+        }
+
+        int interval = config.getInt("updates.interval");
+
+        long updateInterval = interval * 60;
+
         getProxy().getScheduler().schedule(this, () -> {
             m_geyser.updateGeyser("bungeecord");
             m_floodgate.updateFloodgate("bungee");
-        }, 20L, 60L, TimeUnit.SECONDS);
+        }, 20L, updateInterval, TimeUnit.SECONDS);
     }
 
     private void saveDefaultConfig() {
