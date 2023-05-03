@@ -36,8 +36,7 @@ public final class AutoUpdateGeyser extends Plugin {
             if(ifGeyser == null){
                 m_geyser.updateGeyser("spigot");
                 getLogger().info(ChatColor.GREEN + "Geyser has been installed for the first time." + ChatColor.YELLOW + " Please restart the serve again to let it take in effect.");
-            } else if(ifFloodgate == null)
-            {
+            } else {
                 m_floodgate.updateFloodgate("spigot");
                 getLogger().info(ChatColor.GREEN + "Floodgate has been installed for the first time." + ChatColor.YELLOW + " Please restart the serve again to let it take in effect.");
             }
@@ -46,11 +45,12 @@ public final class AutoUpdateGeyser extends Plugin {
 
         int interval = config.getInt("updates.interval");
 
-        long updateInterval = interval * 60;
+        long updateInterval = interval * 60L;
 
         getProxy().getScheduler().schedule(this, () -> {
             m_geyser.updateGeyser("bungeecord");
             m_floodgate.updateFloodgate("bungee");
+            getLogger().info(ChatColor.AQUA + "Periodic Updating Done.");
         }, 20L, updateInterval, TimeUnit.SECONDS);
     }
 

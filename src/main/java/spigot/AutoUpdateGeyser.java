@@ -13,23 +13,13 @@ public final class AutoUpdateGeyser extends JavaPlugin {
 
     private Geyser m_geyser;
     private Floodgate m_floodgate;
+    private FileConfiguration config;
 
     @Override
     public void onEnable() {
         m_geyser = new Geyser();
         m_floodgate = new Floodgate();
-
-        saveDefaultConfig();
-
-        FileConfiguration config = getConfig();
-
-        config.addDefault("updates.geyser", true);
-        config.addDefault("updates.floodgate", false);
-        config.addDefault("updates.interval", 60);
-
-        config.options().copyDefaults(true);
-        saveConfig();
-
+        loadConfiguration();
         updateChecker();
     }
 
@@ -41,21 +31,33 @@ public final class AutoUpdateGeyser extends JavaPlugin {
             if(ifGeyser == null){
                 m_geyser.updateGeyser("spigot");
                 getLogger().info(ChatColor.GREEN + "Geyser has been installed for the first time." + ChatColor.YELLOW + " Please restart the serve again to let it take in effect.");
-            } else if(ifFloodgate == null)
-            {
+            } else {
                 m_floodgate.updateFloodgate("spigot");
                 getLogger().info(ChatColor.GREEN + "Floodgate has been installed for the first time." + ChatColor.YELLOW + " Please restart the serve again to let it take in effect.");
             }
-
         }
 
-        int interval = getConfig().getInt("updates.interval");
+        int interval = config.getInt("updates.interval");
         Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
             @Override
             public void run() {
                 m_geyser.updateGeyser("spigot");
-                m_floodgate.updateFloodgate("spigot");}
+                m_floodgate.updateFloodgate("spigot");
+                getLogger().info(ChatColor.AQUA + "Periodic Updating Done.");
+            }
         }, 300L, 20L * 60L * interval);
     }
 
+    public void loadConfiguration(){
+        saveDefaultConfig();
+
+        config = getConfig();
+
+        config.addDefault("updates.geyser", true);
+        config.addDefault("updates.floodgate", false);
+        config.addDefault("updates.interval", 60);
+
+        config.options().copyDefaults(true);
+        saveConfig();
+    }
 }
