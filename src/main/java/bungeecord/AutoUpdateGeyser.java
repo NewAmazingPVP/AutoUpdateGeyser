@@ -6,7 +6,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 
 import java.io.*;
 import java.nio.file.Files;
