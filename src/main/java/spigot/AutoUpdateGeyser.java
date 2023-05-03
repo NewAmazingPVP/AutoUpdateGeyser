@@ -25,27 +25,34 @@ public final class AutoUpdateGeyser extends JavaPlugin {
 
     public void updateChecker() {
         Plugin ifGeyser = Bukkit.getPluginManager().getPlugin("Geyser-spigot");
-        Plugin ifFloodgate = Bukkit.getPluginManager().getPlugin("Floodgate");
-        if(ifGeyser == null || ifFloodgate == null)
-        {
-            if(ifGeyser == null){
-                m_geyser.updateGeyser("spigot");
-                getLogger().info(ChatColor.GREEN + "Geyser has been installed for the first time." + ChatColor.YELLOW + " Please restart the serve again to let it take in effect.");
-            } else {
-                m_floodgate.updateFloodgate("spigot");
-                getLogger().info(ChatColor.GREEN + "Floodgate has been installed for the first time." + ChatColor.YELLOW + " Please restart the serve again to let it take in effect.");
-            }
-        }
-
+        Plugin ifFloodgate = Bukkit.getPluginManager().getPlugin("floodgate");
         int interval = config.getInt("updates.interval");
+        long bootDelay = config.getInt("updates.bootTime");
+        boolean configGeyser = config.getBoolean("updates.geyser");
+        boolean configFloodgate = config.getBoolean("updates.floodgate");
+
         Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
             @Override
             public void run() {
-                m_geyser.updateGeyser("spigot");
-                m_floodgate.updateFloodgate("spigot");
-                getLogger().info(ChatColor.AQUA + "Periodic Updating Done.");
+                if (ifGeyser == null && configGeyser) {
+                    m_geyser.updateGeyser("spigot");
+                    getLogger().info(ChatColor.GREEN + "Geyser has been installed for the first time." + ChatColor.YELLOW + " Please restart the server again to let it take in effect.");
+                } else if (configGeyser) {
+                    m_geyser.updateGeyser("spigot");
+                }
+
+                if (ifFloodgate == null && configFloodgate) {
+                    m_floodgate.updateFloodgate("spigot");
+                    getLogger().info(ChatColor.GREEN + "Floodgate has been installed for the first time." + ChatColor.YELLOW + " Please restart the server again to let it take in effect.");
+                } else if (configFloodgate) {
+                    m_floodgate.updateFloodgate("spigot");
+                }
+
+                if (configGeyser || configFloodgate) {
+                    getLogger().info(ChatColor.AQUA + "Periodic Updating Done.");
+                }
             }
-        }, 300L, 20L * 60L * interval);
+        }, bootDelay, 20L * 60L * interval);
     }
 
     public void loadConfiguration(){
