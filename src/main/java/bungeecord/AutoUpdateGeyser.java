@@ -69,20 +69,9 @@ public final class AutoUpdateGeyser extends Plugin {
         File file = new File(getDataFolder(), "config.yml");
         try {
             config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
-            if (!config.contains("updates.geyser")) {
-                config.set("updates.geyser", true);
-                saveConfiguration(file);
-            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void saveConfiguration(File file) {
-        try {
-            ConfigurationProvider.getProvider(YamlConfiguration.class).save(config, file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
