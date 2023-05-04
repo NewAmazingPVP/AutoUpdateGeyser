@@ -25,6 +25,7 @@ public final class AutoUpdateGeyser extends Plugin {
         saveDefaultConfig();
         loadConfiguration();
         updateChecker();
+        getLogger().info("Test");
     }
 
     public void updateChecker() {
