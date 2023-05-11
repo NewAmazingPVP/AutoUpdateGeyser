@@ -3,9 +3,8 @@
 # floodgate: default = true # set to true to enable Floodgate updates, false to disable"
 # interval: default = 60 # update interval in minutes"
 # bootTime: default = 20 # Make sure to change this accordingly your server bootTime! Keep this value the boot time of server in seconds (to be safe). Note: You can adjust the values as you want but be warned making it too low will cause errors as it will install geyser before loading.
-updates:
+[updates]
 geyser = true # Set to true to enable Geyser updates, false to disable
 floodgate = true # Set to true to enable Floodgate updates, false to disable
 interval = 60 # Update interval in minutes
 bootTime = 20 # Keep this value the boot time of server in seconds (to be safe). Note: You can adjust the values as you want but be warned making it too low will cause errors as it will install geyser before loading.
-

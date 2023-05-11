@@ -1,70 +1,105 @@
 package velocity;
 
+import com.moandjiezana.toml.Toml;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.plugin.PluginContainer;
+import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import common.Floodgate;
 import common.Geyser;
+import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.scheduler.ScheduledTask;
+import com.velocitypowered.api.proxy.ProxyServer;
+import net.kyori.adventure.text.Component;
+import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import net.kyori.adventure.text.format.NamedTextColor;
 
-import org.bukkit.ChatColor;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.Bukkit;
+import javax.inject.Inject;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
 
-public final class AutoUpdateGeyser extends JavaPlugin {
+@Plugin(id = "autoupdategeyser", name = "AutoUpdateGeyser", version = "1.0.0")
+public final class AutoUpdateGeyser {
 
     private Geyser m_geyser;
     private Floodgate m_floodgate;
-    private FileConfiguration config;
+    private ConfigurationNode config;
+    private ProxyServer proxy;
+    private ScheduledTask task;
+    private final Path dataDirectory;
 
-    @Override
-    public void onEnable() {
+    @Inject
+    public AutoUpdateGeyser(ProxyServer proxy, @DataDirectory Path dataDirectory) {
+        this.proxy = proxy;
+        this.dataDirectory = dataDirectory;
+        loadConfig(dataDirectory);
+    }
+
+
+    @Subscribe
+    public void onProxyInitialize(ProxyInitializeEvent event) {
         m_geyser = new Geyser();
         m_floodgate = new Floodgate();
-        loadConfiguration();
         updateChecker();
     }
 
     public void updateChecker() {
-        Plugin ifGeyser = Bukkit.getPluginManager().getPlugin("Geyser-spigot");
-        Plugin ifFloodgate = Bukkit.getPluginManager().getPlugin("floodgate");
-        int interval = config.getInt("updates.interval");
-        long bootDelay = config.getInt("updates.bootTime");
-        boolean configGeyser = config.getBoolean("updates.geyser");
-        boolean configFloodgate = config.getBoolean("updates.floodgate");
+        PluginContainer ifGeyser = proxy.getPluginManager().getPlugin("Geyser-Velocity").orElse(null);
+        PluginContainer ifFloodgate = proxy.getPluginManager().getPlugin("floodgate").orElse(null);
+        int interval = config.getNode("updates", "interval").getInt();
+        long updateInterval = interval * 60L;
+        long bootDelay = config.getNode("updates", "bootTime").getInt();
 
-        Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
-            @Override
-            public void run() {
-                if (ifGeyser == null && configGeyser) {
-                    m_geyser.updateGeyser("spigot");
-                    getLogger().info(ChatColor.GREEN + "Geyser has been installed for the first time." + ChatColor.YELLOW + " Please restart the server again to let it take in effect.");
-                } else if (configGeyser) {
-                    m_geyser.updateGeyser("spigot");
-                }
+        boolean configGeyser = config.getNode("updates", "geyser").getBoolean();
+        boolean configFloodgate = config.getNode("updates", "floodgate").getBoolean();
 
-                if (ifFloodgate == null && configFloodgate) {
-                    m_floodgate.updateFloodgate("spigot");
-                    getLogger().info(ChatColor.GREEN + "Floodgate has been installed for the first time." + ChatColor.YELLOW + " Please restart the server again to let it take in effect.");
-                } else if (configFloodgate) {
-                    m_floodgate.updateFloodgate("spigot");
-                }
-
-                if (configGeyser || configFloodgate) {
-                    getLogger().info(ChatColor.AQUA + "Periodic Updating Done.");
-                }
+        task = proxy.getScheduler().buildTask(this, () -> {
+            if (ifGeyser == null && configGeyser) {
+                m_geyser.updateGeyser("velocity");
+                proxy.getConsoleCommandSource().sendMessage(Component.text("Geyser has been installed for the first time. Please restart the server again to let it take in effect.", NamedTextColor.GREEN));
+            } else if (configGeyser) {
+                m_geyser.updateGeyser("velocity");
             }
-        }, bootDelay, 20L * 60L * interval);
+
+            if (ifFloodgate == null && configFloodgate) {
+                m_floodgate.updateFloodgate("velocity");
+                proxy.getConsoleCommandSource().sendMessage(Component.text("Floodgate has been installed for the first time. Please restart the server again to let it take in effect.", NamedTextColor.GREEN));
+            } else if (configFloodgate) {
+                m_floodgate.updateFloodgate("velocity");
+            }
+
+            if (configGeyser || configFloodgate) {
+                proxy.getConsoleCommandSource().sendMessage(Component.text("Periodic Updating Done.", NamedTextColor.AQUA));
+            }
+        }).delay(Duration.ofSeconds(bootDelay)).repeat(Duration.ofSeconds(updateInterval)).schedule();
     }
 
-    public void loadConfiguration(){
-        saveDefaultConfig();
+    private Toml loadConfig(Path path) {
+        File folder = path.toFile();
+        File file = new File(folder, "config.toml");
 
-        config = getConfig();
-
-        config.addDefault("updates.geyser", true);
-        config.addDefault("updates.floodgate", false);
-        config.addDefault("updates.interval", 60);
-
-        config.options().copyDefaults(true);
-        saveConfig();
+        if (!file.exists()) {
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+            try (InputStream input = getClass().getResourceAsStream("/" + file.getName())) {
+                if (input != null) {
+                    Files.copy(input, file.toPath());
+                } else {
+                    file.createNewFile();
+                }
+            } catch (IOException exception) {
+                exception.printStackTrace();
+                return null;
+            }
+        }
+        return new Toml().read(file);
     }
+
+
 }

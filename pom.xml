@@ -56,6 +56,10 @@
 
     <repositories>
         <repository>
+            <id>sponge</id>
+            <url>https://repo.spongepowered.org/repository/maven-public/</url>
+        </repository>
+        <repository>
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
@@ -83,6 +87,12 @@
             <artifactId>velocity-api</artifactId>
             <version>3.1.1</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>configurate-toml</artifactId>
+            <version>4.0.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>
