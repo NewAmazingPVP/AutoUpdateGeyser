@@ -3,3 +3,4 @@ spigot\AutoUpdateGeyser.class
 bungeecord\AutoUpdateGeyser.class
 spigot\AutoUpdateGeyser$1.class
 common\Geyser.class
+velocity\AutoUpdateGeyser.class

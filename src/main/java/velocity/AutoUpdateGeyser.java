@@ -8,11 +8,8 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import common.Floodgate;
 import common.Geyser;
 import com.velocitypowered.api.plugin.Plugin;
-import com.velocitypowered.api.scheduler.ScheduledTask;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.Component;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import net.kyori.adventure.text.format.NamedTextColor;
 
 import javax.inject.Inject;
@@ -23,23 +20,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 
-@Plugin(id = "autoupdategeyser", name = "AutoUpdateGeyser", version = "1.0.0")
+@Plugin(id = "autoupdategeyser",name = "AutoUpdateGeyser",version = "2.0", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/",authors = "NewAmazingPVP")
 public final class AutoUpdateGeyser {
 
     private Geyser m_geyser;
     private Floodgate m_floodgate;
-    private ConfigurationNode config;
+    private Toml config;
     private ProxyServer proxy;
-    private ScheduledTask task;
-    private final Path dataDirectory;
 
     @Inject
     public AutoUpdateGeyser(ProxyServer proxy, @DataDirectory Path dataDirectory) {
         this.proxy = proxy;
-        this.dataDirectory = dataDirectory;
-        loadConfig(dataDirectory);
+        config = loadConfig(dataDirectory);
     }
-
 
     @Subscribe
     public void onProxyInitialize(ProxyInitializeEvent event) {
@@ -49,16 +42,16 @@ public final class AutoUpdateGeyser {
     }
 
     public void updateChecker() {
-        PluginContainer ifGeyser = proxy.getPluginManager().getPlugin("Geyser-Velocity").orElse(null);
+        PluginContainer ifGeyser = proxy.getPluginManager().getPlugin("geyser").orElse(null);
         PluginContainer ifFloodgate = proxy.getPluginManager().getPlugin("floodgate").orElse(null);
-        int interval = config.getNode("updates", "interval").getInt();
+        long interval = config.getLong("updates.interval");
         long updateInterval = interval * 60L;
-        long bootDelay = config.getNode("updates", "bootTime").getInt();
+        long bootDelay = config.getLong("updates.bootTime");
 
-        boolean configGeyser = config.getNode("updates", "geyser").getBoolean();
-        boolean configFloodgate = config.getNode("updates", "floodgate").getBoolean();
+        boolean configGeyser = config.getBoolean("updates.geyser");
+        boolean configFloodgate = config.getBoolean("updates.floodgate");
 
-        task = proxy.getScheduler().buildTask(this, () -> {
+        proxy.getScheduler().buildTask(this, () -> {
             if (ifGeyser == null && configGeyser) {
                 m_geyser.updateGeyser("velocity");
                 proxy.getConsoleCommandSource().sendMessage(Component.text("Geyser has been installed for the first time. Please restart the server again to let it take in effect.", NamedTextColor.GREEN));
@@ -100,6 +93,5 @@ public final class AutoUpdateGeyser {
         }
         return new Toml().read(file);
     }
-
 
 }
