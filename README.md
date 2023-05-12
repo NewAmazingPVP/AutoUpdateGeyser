@@ -1,18 +1,16 @@
 # AutoUpdateGeyser
-AutoUpdateGeyser is a plugin for Spigot and Bungeecord that automates the updating of Geyser and Floodgate at a specified Interval.
+AutoUpdateGeyser is a plugin for Spigot/Velocity/Bungeecord that automates the updating of Geyser and Floodgate at a specified Interval.
 
 Spigot Link: https://www.spigotmc.org/resources/autoupdategeyser.109632/
 
 # Features
-- Compatible with Minecraft versions 1.8 and higher for both bungeecord and spigot.
+- Compatible with Minecraft versions 1.8 and higher for both bungeecord, spigot and velocity.
 
 - Automatically downloads latest builds of Geyser and Floodgate from website at specific intervals.
 
 - Config.yml that allows you to specify the interval and what to update.
 
 # Planned Features
-- Velocity Support 
-
 - If you have any suggestions or feature requests, please create a new issue in the project's GitHub repository.
 
 # Installation
