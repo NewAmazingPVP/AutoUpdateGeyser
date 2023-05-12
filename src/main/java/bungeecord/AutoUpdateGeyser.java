@@ -11,7 +11,6 @@ import net.md_5.bungee.api.ChatColor;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
-import bungeecord.Metrics;
 
 public final class AutoUpdateGeyser extends Plugin {
 

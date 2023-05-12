@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import velocity.Metrics;
 
 @Plugin(id = "autoupdategeyser",name = "AutoUpdateGeyser",version = "2.0", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/",authors = "NewAmazingPVP")
 public final class AutoUpdateGeyser {
