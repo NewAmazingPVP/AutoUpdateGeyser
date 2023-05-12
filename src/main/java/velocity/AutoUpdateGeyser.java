@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import velocity.Metrics;
 
 @Plugin(id = "autoupdategeyser",name = "AutoUpdateGeyser",version = "2.0", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/",authors = "NewAmazingPVP")
 public final class AutoUpdateGeyser {
@@ -27,15 +28,17 @@ public final class AutoUpdateGeyser {
     private Floodgate m_floodgate;
     private Toml config;
     private ProxyServer proxy;
-
+    private final Metrics.Factory metricsFactory;
     @Inject
-    public AutoUpdateGeyser(ProxyServer proxy, @DataDirectory Path dataDirectory) {
+    public AutoUpdateGeyser(ProxyServer proxy, @DataDirectory Path dataDirectory, Metrics.Factory metricsFactory) {
         this.proxy = proxy;
         config = loadConfig(dataDirectory);
+        this.metricsFactory = metricsFactory;
     }
 
     @Subscribe
     public void onProxyInitialize(ProxyInitializeEvent event) {
+        metricsFactory.make(this, 18448);
         m_geyser = new Geyser();
         m_floodgate = new Floodgate();
         updateChecker();

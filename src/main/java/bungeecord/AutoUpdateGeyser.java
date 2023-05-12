@@ -11,6 +11,7 @@ import net.md_5.bungee.api.ChatColor;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
+import bungeecord.Metrics;
 
 public final class AutoUpdateGeyser extends Plugin {
 
@@ -20,6 +21,7 @@ public final class AutoUpdateGeyser extends Plugin {
 
     @Override
     public void onEnable() {
+        new Metrics(this, 18449);
         m_geyser = new Geyser();
         m_floodgate = new Floodgate();
         saveDefaultConfig();
