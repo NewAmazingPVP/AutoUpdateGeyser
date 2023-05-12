@@ -8,6 +8,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.Bukkit;
+import spigot.Metrics;
 
 public final class AutoUpdateGeyser extends JavaPlugin {
 
@@ -17,6 +18,7 @@ public final class AutoUpdateGeyser extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        new Metrics(this, 18445);
         m_geyser = new Geyser();
         m_floodgate = new Floodgate();
         loadConfiguration();

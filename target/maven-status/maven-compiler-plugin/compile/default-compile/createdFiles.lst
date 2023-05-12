@@ -1,6 +1,15 @@
 common\Floodgate.class
-spigot\AutoUpdateGeyser.class
+spigot\Metrics$AdvancedBarChart.class
+spigot\Metrics$SimplePie.class
 bungeecord\AutoUpdateGeyser.class
+spigot\Metrics.class
 spigot\AutoUpdateGeyser$1.class
+spigot\Metrics$CustomChart.class
+spigot\Metrics$DrilldownPie.class
 common\Geyser.class
 velocity\AutoUpdateGeyser.class
+spigot\Metrics$MultiLineChart.class
+spigot\AutoUpdateGeyser.class
+spigot\Metrics$SingleLineChart.class
+spigot\Metrics$SimpleBarChart.class
+spigot\Metrics$AdvancedPie.class
