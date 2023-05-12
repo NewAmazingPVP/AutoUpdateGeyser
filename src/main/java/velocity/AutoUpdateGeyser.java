@@ -21,7 +21,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 
 @Plugin(id = "autoupdategeyser",name = "AutoUpdateGeyser",version = "2.0", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/",authors = "NewAmazingPVP")
-public final class AutoUpdateGeyser {
+public final class  AutoUpdateGeyser {
 
     private Geyser m_geyser;
     private Floodgate m_floodgate;
