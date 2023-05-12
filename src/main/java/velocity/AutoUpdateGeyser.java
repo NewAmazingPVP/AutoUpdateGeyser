@@ -71,7 +71,7 @@ public final class AutoUpdateGeyser {
             if (configGeyser || configFloodgate) {
                 proxy.getConsoleCommandSource().sendMessage(Component.text("Periodic Updating Done.", NamedTextColor.AQUA));
             }
-        }).delay(Duration.ofSeconds(bootDelay)).repeat(Duration.ofSeconds(updateInterval)).schedule();
+        }).delay(Duration.ofSeconds(bootDelay)).repeat(Duration.ofMinutes(updateInterval)).schedule();
     }
 
     private Toml loadConfig(Path path) {

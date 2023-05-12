@@ -53,7 +53,7 @@ public final class AutoUpdateGeyser extends JavaPlugin {
                     getLogger().info(ChatColor.AQUA + "Periodic Updating Done.");
                 }
             }
-        }, bootDelay, 20L * 60L * interval);
+        }, bootDelay*20L, 20L * 60L * interval);
     }
 
     public void loadConfiguration(){
