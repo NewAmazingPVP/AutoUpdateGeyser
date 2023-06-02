@@ -39,23 +39,25 @@ public final class AutoUpdateGeyser extends Plugin {
         boolean configFloodgate = config.getBoolean("updates.floodgate");
 
         getProxy().getScheduler().schedule(this, () -> {
-            if (ifGeyser == null && configGeyser) {
-                m_geyser.updateGeyser("bungeecord");
-                getLogger().info(ChatColor.GREEN + "Geyser has been installed for the first time." + ChatColor.YELLOW + " Please restart the server again to let it take in effect.");
-            } else if (configGeyser) {
-                m_geyser.updateGeyser("bungeecord");
-            }
+            getProxy().getScheduler().runAsync(this, () -> {
+                if (ifGeyser == null && configGeyser) {
+                    m_geyser.updateGeyser("bungeecord");
+                    getLogger().info(ChatColor.GREEN + "Geyser has been installed for the first time." + ChatColor.YELLOW + " Please restart the server again to let it take in effect.");
+                } else if (configGeyser) {
+                    m_geyser.updateGeyser("bungeecord");
+                }
 
-            if (ifFloodgate == null && configFloodgate) {
-                m_floodgate.updateFloodgate("bungee");
-                getLogger().info(ChatColor.GREEN + "Floodgate has been installed for the first time." + ChatColor.YELLOW + " Please restart the server again to let it take in effect.");
-            } else if (configFloodgate) {
-                m_floodgate.updateFloodgate("bungee");
-            }
+                if (ifFloodgate == null && configFloodgate) {
+                    m_floodgate.updateFloodgate("bungee");
+                    getLogger().info(ChatColor.GREEN + "Floodgate has been installed for the first time." + ChatColor.YELLOW + " Please restart the server again to let it take in effect.");
+                } else if (configFloodgate) {
+                    m_floodgate.updateFloodgate("bungee");
+                }
 
-            if (configGeyser || configFloodgate) {
-                getLogger().info(ChatColor.AQUA + "Periodic Updating Done.");
-            }
+                if (configGeyser || configFloodgate) {
+                    getLogger().info(ChatColor.AQUA + "Periodic Updating Done.");
+                }
+            });
         }, bootDelay, updateInterval, TimeUnit.SECONDS);
     }
 

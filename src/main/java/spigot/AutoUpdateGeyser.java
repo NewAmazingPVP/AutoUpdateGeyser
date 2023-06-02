@@ -32,7 +32,7 @@ public final class AutoUpdateGeyser extends JavaPlugin {
         boolean configGeyser = config.getBoolean("updates.geyser");
         boolean configFloodgate = config.getBoolean("updates.floodgate");
 
-        Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
             @Override
             public void run() {
                 if (ifGeyser == null && configGeyser) {
