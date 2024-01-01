@@ -25,9 +25,6 @@ public final class AutoUpdateGeyser extends Plugin {
     private Configuration config;
     private Plugin ifGeyser;
     private Plugin ifFloodgate;
-    private int interval;
-    private long updateInterval;
-    private long bootDelay;
     private boolean configGeyser;
     private boolean configFloodgate;
 
@@ -46,9 +43,9 @@ public final class AutoUpdateGeyser extends Plugin {
     public void updateChecker() {
         ifGeyser = getProxy().getPluginManager().getPlugin("Geyser-BungeeCord");
         ifFloodgate = getProxy().getPluginManager().getPlugin("floodgate");
-        interval = config.getInt("updates.interval");
-        updateInterval = interval * 60L;
-        bootDelay = config.getInt("updates.bootTime");
+        int interval = config.getInt("updates.interval");
+        long updateInterval = interval * 60L;
+        long bootDelay = config.getInt("updates.bootTime");
         configGeyser = config.getBoolean("updates.geyser");
         configFloodgate = config.getBoolean("updates.floodgate");
 
@@ -85,6 +82,7 @@ public final class AutoUpdateGeyser extends Plugin {
 
     private void scheduleRestartIfAutoRestart() {
         if (config.getBoolean("updates.autoRestart")) {
+            getLogger().info(ChatColor.RED + "Restarting in 10 seconds");
             ProxyServer.getInstance().getScheduler().schedule(this, () -> {
                 ProxyServer.getInstance().getPluginManager().dispatchCommand(ProxyServer.getInstance().getConsole(), "end");
             }, 10, TimeUnit.SECONDS);

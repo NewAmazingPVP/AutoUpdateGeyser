@@ -78,6 +78,7 @@ public final class AutoUpdateGeyser extends JavaPlugin {
 
     private void scheduleRestartIfAutoRestart() {
         if (config.getBoolean("updates.autoRestart")) {
+            getLogger().info(ChatColor.RED + "Restarting in 10 seconds");
             Bukkit.getScheduler().runTaskLater(this, () -> getServer().dispatchCommand(getServer().getConsoleSender(), "restart"), 200);
         }
     }

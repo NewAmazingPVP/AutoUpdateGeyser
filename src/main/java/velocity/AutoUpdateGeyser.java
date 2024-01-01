@@ -27,7 +27,7 @@ import java.time.Duration;
 import static common.BuildYml.createYamlFile;
 import static common.BuildYml.updateBuildNumber;
 
-@Plugin(id = "autoupdategeyser",name = "AutoUpdateGeyser",version = "2.5", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/",authors = "NewAmazingPVP")
+@Plugin(id = "autoupdategeyser",name = "AutoUpdateGeyser",version = "3.0", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/",authors = "NewAmazingPVP")
 public final class AutoUpdateGeyser {
 
     private Geyser m_geyser;
@@ -38,9 +38,6 @@ public final class AutoUpdateGeyser {
     private Path dataDirectory;
     private PluginContainer ifGeyser;
     private PluginContainer ifFloodgate;
-    private long interval;
-    private long updateInterval;
-    private long bootDelay;
     private boolean configGeyser;
     private boolean configFloodgate;
 
@@ -71,9 +68,9 @@ public final class AutoUpdateGeyser {
     public void updateChecker() {
         ifGeyser = proxy.getPluginManager().getPlugin("geyser").orElse(null);
         ifFloodgate = proxy.getPluginManager().getPlugin("floodgate").orElse(null);
-        interval = config.getLong("updates.interval");
-        updateInterval = interval * 60L;
-        bootDelay = config.getLong("updates.bootTime");
+        long interval = config.getLong("updates.interval");
+        long updateInterval = interval * 60L;
+        long bootDelay = config.getLong("updates.bootTime");
         configGeyser = config.getBoolean("updates.geyser");
         configFloodgate = config.getBoolean("updates.floodgate");
 
@@ -109,6 +106,7 @@ public final class AutoUpdateGeyser {
 
     private void scheduleRestartIfAutoRestart() {
         if (config.getBoolean("updates.autoRestart")) {
+            proxy.getConsoleCommandSource().sendMessage(Component.text("Restarting in 10 seconds!", NamedTextColor.RED));
             proxy.getScheduler().buildTask(this, () -> {
                 proxy.getCommandManager().executeAsync(proxy.getConsoleCommandSource(), "shutdown");
             }).delay(Duration.ofSeconds(10)).schedule();

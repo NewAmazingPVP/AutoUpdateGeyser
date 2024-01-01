@@ -1,5 +1,11 @@
 name: AutoUpdateGeyser
-version: '2.5'
+version: '3.0'
 main: bungeecord.AutoUpdateGeyser
 author: NewAmazingPVP
 description: Plugin to automate updating of both Geyser and Floodgate
+commands:
+  updategeyser:
+    description: Force update checker for geyser and floodgate!
+    usage: /updategeyser
+    permission: autoupdategeyser.admin
+    default: op

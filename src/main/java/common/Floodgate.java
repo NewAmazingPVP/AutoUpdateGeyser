@@ -14,6 +14,9 @@ public class Floodgate {
 
     public void simpleUpdateFloodgate(String platform) {
         String latestVersionUrl;
+        if(platform.equals("bungeecord")){
+            platform = "bungee";
+        }
         latestVersionUrl = "https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/" + platform;
         String outputFilePath = "plugins/Floodgate-" + platform + ".jar";
 
