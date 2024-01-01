@@ -20,6 +20,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 
+import static common.BuildYml.createYamlFile;
+import static common.BuildYml.updateBuildNumber;
+
 @Plugin(id = "autoupdategeyser",name = "AutoUpdateGeyser",version = "2.5", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/",authors = "NewAmazingPVP")
 public final class AutoUpdateGeyser {
 
@@ -28,11 +31,13 @@ public final class AutoUpdateGeyser {
     private Toml config;
     private ProxyServer proxy;
     private final Metrics.Factory metricsFactory;
+    private Path dataDirectory;
     @Inject
     public AutoUpdateGeyser(ProxyServer proxy, @DataDirectory Path dataDirectory, Metrics.Factory metricsFactory) {
         this.proxy = proxy;
         config = loadConfig(dataDirectory);
         this.metricsFactory = metricsFactory;
+        this.dataDirectory = dataDirectory;
     }
 
     @Subscribe
@@ -40,6 +45,7 @@ public final class AutoUpdateGeyser {
         metricsFactory.make(this, 18448);
         m_geyser = new Geyser();
         m_floodgate = new Floodgate();
+        createYamlFile(dataDirectory.toAbsolutePath().toString());
         updateChecker();
     }
 
@@ -54,25 +60,43 @@ public final class AutoUpdateGeyser {
         boolean configFloodgate = config.getBoolean("updates.floodgate");
 
         proxy.getScheduler().buildTask(this, () -> {
-            if (ifGeyser == null && configGeyser) {
-                m_geyser.updateGeyser("velocity");
-                proxy.getConsoleCommandSource().sendMessage(Component.text("Geyser has been installed for the first time. Please restart the server again to let it take in effect.", NamedTextColor.GREEN));
-            } else if (configGeyser) {
-                m_geyser.updateGeyser("velocity");
-            }
+            updatePlugin("Geyser", ifGeyser, configGeyser);
+            updatePlugin("Floodgate", ifFloodgate, configFloodgate);
 
-            if (ifFloodgate == null && configFloodgate) {
-                m_floodgate.updateFloodgate("velocity");
-                proxy.getConsoleCommandSource().sendMessage(Component.text("Floodgate has been installed for the first time. Please restart the server again to let it take in effect.", NamedTextColor.GREEN));
-            } else if (configFloodgate) {
-                m_floodgate.updateFloodgate("velocity");
-            }
-
-            if (configGeyser || configFloodgate) {
-                proxy.getConsoleCommandSource().sendMessage(Component.text("Periodic Updating Done.", NamedTextColor.AQUA));
-            }
         }).delay(Duration.ofSeconds(bootDelay)).repeat(Duration.ofMinutes(updateInterval)).schedule();
     }
+
+    private void updatePlugin(String pluginName, Object pluginInstance, boolean configCheck) {
+        if (pluginInstance == null && configCheck) {
+            updateBuildNumber(pluginName, -1);
+            if (updatePluginInstallation(pluginName)) {
+                proxy.getConsoleCommandSource().sendMessage(Component.text(pluginName + " has been installed for the first time. Please restart the server again to let it take effect.", NamedTextColor.GREEN));
+                scheduleRestartIfAutoRestart();
+            }
+        } else if (configCheck) {
+            if (updatePluginInstallation(pluginName)) {
+                proxy.getConsoleCommandSource().sendMessage(Component.text("New update of " + pluginName + " was downloaded. Please restart to let it take effect.", NamedTextColor.GREEN));
+                scheduleRestartIfAutoRestart();
+            }
+        }
+    }
+
+    private boolean updatePluginInstallation(String pluginName) {
+        return switch (pluginName) {
+            case "Geyser" -> m_geyser.updateGeyser("velocity");
+            case "Floodgate" -> m_floodgate.updateFloodgate("velocity");
+            default -> false;
+        };
+    }
+
+    private void scheduleRestartIfAutoRestart() {
+        if (config.getBoolean("updates.autoRestart")) {
+            proxy.getScheduler().buildTask(this, () -> {
+                proxy.getCommandManager().executeAsync(proxy.getConsoleCommandSource(), "shutdown");
+            }).delay(Duration.ofSeconds(10)).schedule();
+        }
+    }
+
 
     private Toml loadConfig(Path path) {
         File folder = path.toFile();

@@ -35,5 +35,6 @@ common\Geyser.class
 velocity\AutoUpdateGeyser.class
 bungeecord\Metrics$AdvancedPie.class
 velocity\Metrics$SimpleBarChart.class
+common\BuildYml.class
 spigot\Metrics$SingleLineChart.class
 velocity\Metrics$MultiLineChart.class

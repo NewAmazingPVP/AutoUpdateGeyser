@@ -9,8 +9,5 @@
         <module name="AutoUpdateGeyser" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="AutoUpdateGeyser" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>

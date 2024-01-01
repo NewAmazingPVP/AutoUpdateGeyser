@@ -9,6 +9,9 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.Bukkit;
 
+import static common.BuildYml.createYamlFile;
+import static common.BuildYml.updateBuildNumber;
+
 public final class AutoUpdateGeyser extends JavaPlugin {
 
     private Geyser m_geyser;
@@ -21,6 +24,7 @@ public final class AutoUpdateGeyser extends JavaPlugin {
         m_geyser = new Geyser();
         m_floodgate = new Floodgate();
         loadConfiguration();
+        createYamlFile(getDataFolder().getAbsolutePath());
         updateChecker();
     }
 
@@ -35,25 +39,39 @@ public final class AutoUpdateGeyser extends JavaPlugin {
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
             @Override
             public void run() {
-                if (ifGeyser == null && configGeyser) {
-                    m_geyser.updateGeyser("spigot");
-                    getLogger().info(ChatColor.GREEN + "Geyser has been installed for the first time." + ChatColor.YELLOW + " Please restart the server again to let it take in effect.");
-                } else if (configGeyser) {
-                    m_geyser.updateGeyser("spigot");
-                }
-
-                if (ifFloodgate == null && configFloodgate) {
-                    m_floodgate.updateFloodgate("spigot");
-                    getLogger().info(ChatColor.GREEN + "Floodgate has been installed for the first time." + ChatColor.YELLOW + " Please restart the server again to let it take in effect.");
-                } else if (configFloodgate) {
-                    m_floodgate.updateFloodgate("spigot");
-                }
-
-                if (configGeyser || configFloodgate) {
-                    getLogger().info(ChatColor.AQUA + "Periodic Updating Done.");
-                }
+                updatePlugin("Geyser", ifGeyser, configGeyser);
+                updatePlugin("Floodgate", ifFloodgate, configFloodgate);
             }
         }, bootDelay*20L, 20L * 60L * interval);
+    }
+
+    private void updatePlugin(String pluginName, Object pluginInstance, boolean configCheck) {
+        if (pluginInstance == null && configCheck) {
+            updateBuildNumber(pluginName, -1);
+            if (updatePluginInstallation(pluginName)) {
+                getLogger().info(ChatColor.GREEN + pluginName + " has been installed for the first time." + ChatColor.YELLOW + " Please restart the server again to let it take effect.");
+                scheduleRestartIfAutoRestart();
+            }
+        } else if (configCheck) {
+            if (updatePluginInstallation(pluginName)) {
+                getLogger().info(ChatColor.GREEN + "New update of " + pluginName + " was downloaded." + ChatColor.YELLOW + " Please restart to let it take effect.");
+                scheduleRestartIfAutoRestart();
+            }
+        }
+    }
+
+    private boolean updatePluginInstallation(String pluginName) {
+        return switch (pluginName) {
+            case "Geyser" -> m_geyser.updateGeyser("spigot");
+            case "Floodgate" -> m_floodgate.updateFloodgate("spigot");
+            default -> false;
+        };
+    }
+
+    private void scheduleRestartIfAutoRestart() {
+        if (config.getBoolean("updates.autoRestart")) {
+            Bukkit.getScheduler().runTaskLater(this, () -> getServer().dispatchCommand(getServer().getConsoleSender(), "restart"), 200);
+        }
     }
 
     public void loadConfiguration(){
