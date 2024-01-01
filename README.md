@@ -10,6 +10,8 @@ Spigot Link: https://www.spigotmc.org/resources/autoupdategeyser.109632/
 
 - Config.yml that allows you to specify the interval and what to update.
 
+- /updategeyser command: Force update checker for geyser and floodgate!   Permission: autoupdategeyser.admin
+
 # Planned Features
 - If you have any suggestions or feature requests, please create a new issue in the project's GitHub repository.
 
