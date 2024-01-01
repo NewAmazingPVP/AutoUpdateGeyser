@@ -2,7 +2,9 @@ package bungeecord;
 
 import common.Floodgate;
 import common.Geyser;
+import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -21,6 +23,13 @@ public final class AutoUpdateGeyser extends Plugin {
     private Geyser m_geyser;
     private Floodgate m_floodgate;
     private Configuration config;
+    private Plugin ifGeyser;
+    private Plugin ifFloodgate;
+    private int interval;
+    private long updateInterval;
+    private long bootDelay;
+    private boolean configGeyser;
+    private boolean configFloodgate;
 
     @Override
     public void onEnable() {
@@ -31,17 +40,17 @@ public final class AutoUpdateGeyser extends Plugin {
         loadConfiguration();
         createYamlFile(getDataFolder().getAbsolutePath());
         updateChecker();
+        ProxyServer.getInstance().getPluginManager().registerCommand(this, new UpdateCommand());
     }
 
     public void updateChecker() {
-        Plugin ifGeyser = getProxy().getPluginManager().getPlugin("Geyser-BungeeCord");
-        Plugin ifFloodgate = getProxy().getPluginManager().getPlugin("floodgate");
-        int interval = config.getInt("updates.interval");
-        long updateInterval = interval * 60L;
-        long bootDelay = config.getInt("updates.bootTime");
-
-        boolean configGeyser = config.getBoolean("updates.geyser");
-        boolean configFloodgate = config.getBoolean("updates.floodgate");
+        ifGeyser = getProxy().getPluginManager().getPlugin("Geyser-BungeeCord");
+        ifFloodgate = getProxy().getPluginManager().getPlugin("floodgate");
+        interval = config.getInt("updates.interval");
+        updateInterval = interval * 60L;
+        bootDelay = config.getInt("updates.bootTime");
+        configGeyser = config.getBoolean("updates.geyser");
+        configFloodgate = config.getBoolean("updates.floodgate");
 
         getProxy().getScheduler().schedule(this, () -> {
             getProxy().getScheduler().runAsync(this, () -> {
@@ -102,4 +111,17 @@ public final class AutoUpdateGeyser extends Plugin {
         }
     }
 
+    public class UpdateCommand extends Command {
+
+        public UpdateCommand() {
+            super("updategeyser", "autoupdategeyser.admin");
+        }
+
+        @Override
+        public void execute(CommandSender sender, String[] args) {
+            updatePlugin("Geyser", ifGeyser, configGeyser);
+            updatePlugin("Floodgate", ifFloodgate, configFloodgate);
+            sender.sendMessage(ChatColor.AQUA + "Update checker for Geyser and Floodgate successful!");
+        }
+    }
 }

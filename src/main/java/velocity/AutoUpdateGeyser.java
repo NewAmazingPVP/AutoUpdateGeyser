@@ -1,6 +1,10 @@
 package velocity;
 
 import com.moandjiezana.toml.Toml;
+import com.velocitypowered.api.command.CommandManager;
+import com.velocitypowered.api.command.CommandMeta;
+import com.velocitypowered.api.command.CommandSource;
+import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.PluginContainer;
@@ -32,6 +36,14 @@ public final class AutoUpdateGeyser {
     private ProxyServer proxy;
     private final Metrics.Factory metricsFactory;
     private Path dataDirectory;
+    private PluginContainer ifGeyser;
+    private PluginContainer ifFloodgate;
+    private long interval;
+    private long updateInterval;
+    private long bootDelay;
+    private boolean configGeyser;
+    private boolean configFloodgate;
+
     @Inject
     public AutoUpdateGeyser(ProxyServer proxy, @DataDirectory Path dataDirectory, Metrics.Factory metricsFactory) {
         this.proxy = proxy;
@@ -47,17 +59,23 @@ public final class AutoUpdateGeyser {
         m_floodgate = new Floodgate();
         createYamlFile(dataDirectory.toAbsolutePath().toString());
         updateChecker();
+        CommandManager commandManager = proxy.getCommandManager();
+        CommandMeta commandMeta = commandManager.metaBuilder("updategeyser")
+                .plugin(this)
+                .build();
+
+        SimpleCommand simpleCommand = new UpdateCommand();
+        commandManager.register(commandMeta, simpleCommand);
     }
 
     public void updateChecker() {
-        PluginContainer ifGeyser = proxy.getPluginManager().getPlugin("geyser").orElse(null);
-        PluginContainer ifFloodgate = proxy.getPluginManager().getPlugin("floodgate").orElse(null);
-        long interval = config.getLong("updates.interval");
-        long updateInterval = interval * 60L;
-        long bootDelay = config.getLong("updates.bootTime");
-
-        boolean configGeyser = config.getBoolean("updates.geyser");
-        boolean configFloodgate = config.getBoolean("updates.floodgate");
+        ifGeyser = proxy.getPluginManager().getPlugin("geyser").orElse(null);
+        ifFloodgate = proxy.getPluginManager().getPlugin("floodgate").orElse(null);
+        interval = config.getLong("updates.interval");
+        updateInterval = interval * 60L;
+        bootDelay = config.getLong("updates.bootTime");
+        configGeyser = config.getBoolean("updates.geyser");
+        configFloodgate = config.getBoolean("updates.floodgate");
 
         proxy.getScheduler().buildTask(this, () -> {
             updatePlugin("Geyser", ifGeyser, configGeyser);
@@ -118,6 +136,20 @@ public final class AutoUpdateGeyser {
             }
         }
         return new Toml().read(file);
+    }
+
+    public class UpdateCommand implements SimpleCommand {
+        @Override
+        public boolean hasPermission(final Invocation invocation) {
+            return invocation.source().hasPermission("autoupdategeyser.admin");
+        }
+        @Override
+        public void execute(Invocation invocation) {
+            CommandSource source = invocation.source();
+            updatePlugin("Geyser", ifGeyser, configGeyser);
+            updatePlugin("Floodgate", ifFloodgate, configFloodgate);
+            source.sendMessage(Component.text("Update checker for Geyser and Floodgate successful!").color(NamedTextColor.AQUA));
+        }
     }
 
 }
