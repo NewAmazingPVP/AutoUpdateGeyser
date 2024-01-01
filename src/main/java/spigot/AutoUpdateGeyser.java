@@ -91,6 +91,8 @@ public final class AutoUpdateGeyser extends JavaPlugin {
         config.addDefault("updates.geyser", true);
         config.addDefault("updates.floodgate", false);
         config.addDefault("updates.interval", 60);
+        config.addDefault("updates.bootTime", 5);
+        config.addDefault("updates.autoRestart", false);
 
         config.options().copyDefaults(true);
         saveConfig();
