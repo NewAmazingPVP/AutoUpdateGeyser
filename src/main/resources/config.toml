@@ -1,7 +1,12 @@
 # Update settings for Geyser and Floodgate
+# geyser: default = true # set to true to enable Geyser updates, false to disable
+# floodgate: default = true # set to true to enable Floodgate updates, false to disable
+# interval: default = 60 # update checker interval in minutes
+# bootTime: default = 5 # Number of seconds the plugin should wait after the server is fully done loading to start its update checking process. If set too low could cause errors
+# autoRestart: default = false # Should the plugin auto restart the server/proxy everytime a new update is installed (with a delay of 10 seconds)? NOT RECOMMENDED as players might not be aware.
 [updates]
-geyser = true # Set to true to enable Geyser updates, false to disable
-floodgate = true # Set to true to enable Floodgate updates, false to disable
-interval = 60 # Update interval in minutes
-bootTime = 2 # # Number of seconds the plugin should wait after the server is fully done loading to start its updating process. If set too low could cause errors
-autoRestart = false # Should the plugin auto restart the proxy everytime an update is installed (with a delay of 10 seconds)? NOT RECOMMENDED as players might not be aware.
+geyser = true # set to true to enable Geyser updates, false to disable
+floodgate = true # set to true to enable Floodgate updates, false to disable
+interval = 60 # update checker interval in minutes
+bootTime = 2 # # Number of seconds the plugin should wait after the server is fully done loading to start its update checking process. If set too low could cause errors
+autoRestart = false # Should the plugin auto restart the server/proxy everytime a new update is installed (with a delay of 10 seconds)? NOT RECOMMENDED as players might not be aware.
