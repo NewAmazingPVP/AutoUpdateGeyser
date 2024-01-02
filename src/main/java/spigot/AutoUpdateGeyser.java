@@ -37,7 +37,7 @@ public final class AutoUpdateGeyser extends JavaPlugin {
     }
 
     public void updateChecker() {
-        ifGeyser = Bukkit.getPluginManager().getPlugin("Geyser-spigot");
+        ifGeyser = Bukkit.getPluginManager().getPlugin("Geyser-Spigot");
         ifFloodgate = Bukkit.getPluginManager().getPlugin("floodgate");
         int interval = config.getInt("updates.interval");
         long bootDelay = config.getInt("updates.bootTime");
