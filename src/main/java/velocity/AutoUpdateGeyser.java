@@ -27,7 +27,7 @@ import java.time.Duration;
 import static common.BuildYml.createYamlFile;
 import static common.BuildYml.updateBuildNumber;
 
-@Plugin(id = "autoupdategeyser",name = "AutoUpdateGeyser",version = "4.0", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/",authors = "NewAmazingPVP")
+@Plugin(id = "autoupdategeyser",name = "AutoUpdateGeyser",version = "4.5", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/",authors = "NewAmazingPVP")
 public final class AutoUpdateGeyser {
 
     private Geyser m_geyser;
@@ -106,10 +106,10 @@ public final class AutoUpdateGeyser {
 
     private void scheduleRestartIfAutoRestart() {
         if (config.getBoolean("updates.autoRestart")) {
-            proxy.getConsoleCommandSource().sendMessage(Component.text("Restarting in 10 seconds!", NamedTextColor.RED));
+            proxy.sendMessage(Component.text(config.getString("updates.restartMessage")));
             proxy.getScheduler().buildTask(this, () -> {
                 proxy.getCommandManager().executeAsync(proxy.getConsoleCommandSource(), "shutdown");
-            }).delay(Duration.ofSeconds(10)).schedule();
+            }).delay(Duration.ofSeconds(config.getLong("updates.restartDelay"))).schedule();
         }
     }
 

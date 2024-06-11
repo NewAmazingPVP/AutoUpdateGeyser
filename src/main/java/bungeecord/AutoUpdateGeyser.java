@@ -82,10 +82,10 @@ public final class AutoUpdateGeyser extends Plugin {
 
     private void scheduleRestartIfAutoRestart() {
         if (config.getBoolean("updates.autoRestart")) {
-            getLogger().info(ChatColor.RED + "Restarting in 10 seconds");
+            getProxy().broadcast(ChatColor.translateAlternateColorCodes('&', config.getString("updates.restartMessage")));
             ProxyServer.getInstance().getScheduler().schedule(this, () -> {
                 ProxyServer.getInstance().getPluginManager().dispatchCommand(ProxyServer.getInstance().getConsole(), "end");
-            }, 10, TimeUnit.SECONDS);
+            }, config.getInt("updates.restartDelay"), TimeUnit.SECONDS);
         }
     }
 
