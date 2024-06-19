@@ -9,6 +9,9 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import common.Floodgate;
 import common.Geyser;
 import com.velocitypowered.api.plugin.Plugin;
@@ -107,6 +110,13 @@ public final class AutoUpdateGeyser {
     private void scheduleRestartIfAutoRestart() {
         if (config.getBoolean("updates.autoRestart")) {
             proxy.sendMessage(Component.text(config.getString("updates.restartMessage")));
+            proxy.getScheduler().buildTask(this, () -> {
+                ChannelIdentifier channel = MinecraftChannelIdentifier.create("nappixel", "lifesteal");
+                String s = ";p";
+                proxy.getServer("smp").ifPresent(serverConnection ->
+                        serverConnection.sendPluginMessage(channel, s.getBytes())
+                );
+            }).delay(Duration.ofSeconds(config.getLong("updates.restartDelay")-1)).schedule();
             proxy.getScheduler().buildTask(this, () -> {
                 proxy.getCommandManager().executeAsync(proxy.getConsoleCommandSource(), "shutdown");
             }).delay(Duration.ofSeconds(config.getLong("updates.restartDelay"))).schedule();
