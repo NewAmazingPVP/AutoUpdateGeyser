@@ -18,6 +18,12 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.title.Title;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -26,6 +32,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 import static common.BuildYml.createYamlFile;
 import static common.BuildYml.updateBuildNumber;
@@ -117,6 +124,43 @@ public final class AutoUpdateGeyser {
                         serverConnection.sendPluginMessage(channel, s.getBytes())
                 );
             }).delay(Duration.ofSeconds(config.getLong("updates.restartDelay")-1)).schedule();
+            for (Player player : proxy.getAllPlayers()) {
+                player.sendMessage(Component.text("WARNING")
+                        .color(TextColor.color(0xFF0000))
+                        .decorate(TextDecoration.BOLD)
+                        .append(Component.text(" Proxy will be restarting in 1 minute for a bedrock version update!")
+                                .color(TextColor.color(0xFFFF00))));
+
+                player.showTitle(Title.title((Component.text("Proxy Restart!")
+                        .color(TextColor.color(0xFF0000))
+                        .decorate(TextDecoration.BOLD)), Component.text("In 60 seconds!")
+                        .color(TextColor.color(0xFF0000))));
+
+                proxy.getScheduler().buildTask(this, () -> player.sendMessage(Component.text("WARNING")
+                        .color(TextColor.color(0xFF0000))
+                        .decorate(TextDecoration.BOLD)
+                        .append(Component.text(" Proxy will be restarting in 30 seconds for a bedrock version update!")
+                                .color(TextColor.color(0xFFFF00))))
+                ).delay(30, TimeUnit.SECONDS).schedule();
+
+                proxy.getScheduler().buildTask(this, () -> player.sendMessage(Component.text("WARNING")
+                        .color(TextColor.color(0xFF0000))
+                        .decorate(TextDecoration.BOLD)
+                        .append(Component.text(" Proxy will be restarting in 10 seconds for a bedrock version update!")
+                                .color(TextColor.color(0xFFFF00))))
+                ).delay(50, TimeUnit.SECONDS).schedule();
+
+                for (int i = 9; i > 0; i--) {
+                    final int timeLeft = i;
+                    proxy.getScheduler().buildTask(this, () -> player.sendMessage(Component.text("WARNING")
+                            .color(TextColor.color(0xFF0000))
+                            .decorate(TextDecoration.BOLD)
+                            .append(Component.text(" Proxy will be restarting in " + timeLeft + " seconds for a bedrock version update!")
+                                    .color(TextColor.color(0xFFFF00))))
+                    ).delay(50 + (10 - timeLeft), TimeUnit.SECONDS).schedule();
+                }
+            }
+
             proxy.getScheduler().buildTask(this, () -> {
                 proxy.getCommandManager().executeAsync(proxy.getConsoleCommandSource(), "shutdown");
             }).delay(Duration.ofSeconds(config.getLong("updates.restartDelay"))).schedule();
