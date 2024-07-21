@@ -81,7 +81,6 @@ public final class AutoUpdateGeyser {
         ifGeyser = proxy.getPluginManager().getPlugin("geyser").orElse(null);
         ifFloodgate = proxy.getPluginManager().getPlugin("floodgate").orElse(null);
         long interval = config.getLong("updates.interval");
-        long updateInterval = interval * 60L;
         long bootDelay = config.getLong("updates.bootTime");
         configGeyser = config.getBoolean("updates.geyser");
         configFloodgate = config.getBoolean("updates.floodgate");
@@ -90,7 +89,7 @@ public final class AutoUpdateGeyser {
             updatePlugin("Geyser", ifGeyser, configGeyser);
             updatePlugin("Floodgate", ifFloodgate, configFloodgate);
 
-        }).delay(Duration.ofSeconds(bootDelay)).repeat(Duration.ofMinutes(updateInterval)).schedule();
+        }).delay(Duration.ofSeconds(bootDelay)).repeat(Duration.ofMinutes(interval)).schedule();
     }
 
     private void updatePlugin(String pluginName, Object pluginInstance, boolean configCheck) {
@@ -158,13 +157,11 @@ public final class AutoUpdateGeyser {
                         .decorate(TextDecoration.BOLD)
                         .append(Component.text(" Proxy will be restarting in 1 minute for a bedrock version update!")
                                 .color(TextColor.color(0xFFFF00))));
-                System.out.println("Proxy will be restarting in 1 minute for a bedrock version update!");
 
                 player.showTitle(Title.title((Component.text("Proxy Restart!")
                         .color(TextColor.color(0xFF0000))
                         .decorate(TextDecoration.BOLD)), Component.text("In 60 seconds!")
                         .color(TextColor.color(0xFF0000))));
-                System.out.println("Proxy will be restarting in 1 minute for a bedrock version update!");
 
                 proxy.getScheduler().buildTask(this, () -> player.sendMessage(Component.text("WARNING")
                         .color(TextColor.color(0xFF0000))
@@ -172,7 +169,6 @@ public final class AutoUpdateGeyser {
                         .append(Component.text(" Proxy will be restarting in 30 seconds for a bedrock version update!")
                                 .color(TextColor.color(0xFFFF00))))
                 ).delay(30, TimeUnit.SECONDS).schedule();
-                System.out.println("Proxy will be restarting in 30 seconds for a bedrock version update!");
 
                 proxy.getScheduler().buildTask(this, () -> player.sendMessage(Component.text("WARNING")
                         .color(TextColor.color(0xFF0000))
@@ -180,7 +176,6 @@ public final class AutoUpdateGeyser {
                         .append(Component.text(" Proxy will be restarting in 10 seconds for a bedrock version update!")
                                 .color(TextColor.color(0xFFFF00))))
                 ).delay(50, TimeUnit.SECONDS).schedule();
-                System.out.println("Proxy will be restarting in 10 seconds for a bedrock version update!");
 
                 for (int i = 9; i > 0; i--) {
                     final int timeLeft = i;
