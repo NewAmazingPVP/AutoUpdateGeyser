@@ -157,6 +157,7 @@ public final class AutoUpdateGeyser {
                         .decorate(TextDecoration.BOLD)
                         .append(Component.text(" Proxy will be restarting in 1 minute for a bedrock version update!")
                                 .color(TextColor.color(0xFFFF00))));
+                System.out.println("Proxy will be restarting in 1 minute for a bedrock version update!");
 
                 player.showTitle(Title.title((Component.text("Proxy Restart!")
                         .color(TextColor.color(0xFF0000))
