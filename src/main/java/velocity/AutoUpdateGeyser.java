@@ -1,5 +1,7 @@
 package velocity;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import com.moandjiezana.toml.Toml;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
@@ -12,6 +14,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import common.Floodgate;
 import common.Geyser;
 import com.velocitypowered.api.plugin.Plugin;
@@ -26,12 +29,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 
 import javax.inject.Inject;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static common.BuildYml.createYamlFile;
@@ -114,15 +116,41 @@ public final class AutoUpdateGeyser {
         };
     }
 
+    public boolean sendPluginMessageToBackend(RegisteredServer server, ChannelIdentifier identifier, byte[] data) {
+        // On success, returns true
+        return server.sendPluginMessage(identifier, data);
+    }
+
     private void scheduleRestartIfAutoRestart() {
         if (config.getBoolean("updates.autoRestart")) {
             proxy.sendMessage(Component.text(config.getString("updates.restartMessage")));
             proxy.getScheduler().buildTask(this, () -> {
-                ChannelIdentifier channel = MinecraftChannelIdentifier.create("nappixel", "lifesteal");
-                String s = "forceRestart";
-                proxy.getServer("smp").ifPresent(serverConnection ->
-                        serverConnection.sendPluginMessage(channel, s.getBytes())
-                );
+                MinecraftChannelIdentifier IDENTIFIER = MinecraftChannelIdentifier.from("nappixel:lifesteal");
+                ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                out.writeUTF("forceRestart");
+
+
+                ByteArrayOutputStream msgbytes = new ByteArrayOutputStream();
+                DataOutputStream msgout = new DataOutputStream(msgbytes);
+                try {
+                    msgout.writeUTF("forceRestartLOL");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    msgout.writeShort(42);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                out.writeShort(msgbytes.toByteArray().length);
+                out.write(msgbytes.toByteArray());
+
+                Optional<RegisteredServer> optionalServer = proxy.getServer("smp");
+                if( proxy.getServer("smp").isPresent()){
+                    RegisteredServer server = optionalServer.get();
+                    sendPluginMessageToBackend(server, IDENTIFIER, out.toByteArray());
+                }
             }).delay(Duration.ofSeconds(config.getLong("updates.restartDelay")-1)).schedule();
             for (Player player : proxy.getAllPlayers()) {
                 player.sendMessage(Component.text("WARNING")
