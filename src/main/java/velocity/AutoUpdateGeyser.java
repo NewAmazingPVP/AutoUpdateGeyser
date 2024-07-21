@@ -69,7 +69,6 @@ public final class AutoUpdateGeyser {
         ifGeyser = proxy.getPluginManager().getPlugin("geyser").orElse(null);
         ifFloodgate = proxy.getPluginManager().getPlugin("floodgate").orElse(null);
         long interval = config.getLong("updates.interval");
-        long updateInterval = interval * 60L;
         long bootDelay = config.getLong("updates.bootTime");
         configGeyser = config.getBoolean("updates.geyser");
         configFloodgate = config.getBoolean("updates.floodgate");
@@ -78,7 +77,7 @@ public final class AutoUpdateGeyser {
             updatePlugin("Geyser", ifGeyser, configGeyser);
             updatePlugin("Floodgate", ifFloodgate, configFloodgate);
 
-        }).delay(Duration.ofSeconds(bootDelay)).repeat(Duration.ofMinutes(updateInterval)).schedule();
+        }).delay(Duration.ofSeconds(bootDelay)).repeat(Duration.ofMinutes(interval)).schedule();
     }
 
     private void updatePlugin(String pluginName, Object pluginInstance, boolean configCheck) {
