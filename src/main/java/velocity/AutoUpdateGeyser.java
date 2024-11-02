@@ -27,7 +27,7 @@ import java.time.Duration;
 import static common.BuildYml.createYamlFile;
 import static common.BuildYml.updateBuildNumber;
 
-@Plugin(id = "autoupdategeyser",name = "AutoUpdateGeyser",version = "5.0", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/",authors = "NewAmazingPVP")
+@Plugin(id = "autoupdategeyser",name = "AutoUpdateGeyser",version = "5.5", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/",authors = "NewAmazingPVP")
 public final class AutoUpdateGeyser {
 
     private Geyser m_geyser;

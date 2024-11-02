@@ -16,8 +16,18 @@ public class BuildYml {
     public static String file;
 
     public static void createYamlFile(String folder) {
-        file = folder + "/doNotTouch.yml";
+        file = folder + "/builds.yml";
         Path filePath = Paths.get(file);
+
+        // for those who updated
+        if (Files.exists(Paths.get(folder + "/doNotTouch.yml"))) {
+            try {
+                Files.delete(filePath);
+                System.out.println("AutoUpdateGeyser old doNotTouch.yml file detected. Deleting it and regenerating builds.yml file...");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
         if (!Files.exists(filePath)) {
             DumperOptions options = new DumperOptions();
@@ -30,15 +40,14 @@ public class BuildYml {
                         Map.entry("Floodgate", -1)
                 );
 
-
-
             try (FileWriter writer = new FileWriter(filePath.toFile())) {
                 yaml.dump(initialData, writer);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else {
         }
+
+
     }
 
     public static void updateBuildNumber(String key, int newBuildNumber) {
@@ -53,7 +62,7 @@ public class BuildYml {
                     System.out.println(key + " build number updated to " + newBuildNumber);
                 }
             } else {
-                System.out.println(key + " not found in the YAML file. Did you touch the doNotTouch.yml file? Regenerate it");
+                System.out.println(key + " not found in the YAML file. Did you touch the builds.yml file? Regenerate it");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -68,7 +77,7 @@ public class BuildYml {
             if (data.containsKey(key)) {
                 return data.get(key);
             } else {
-                System.out.println(key + " not found in the YAML file. Did you touch the doNotTouch.yml file? Regenerate it");
+                System.out.println(key + " not found in the YAML file. Did you touch the builds.yml file? Regenerate it");
                 return -1;
             }
         } catch (IOException e) {
@@ -85,10 +94,10 @@ public class BuildYml {
                 Map<String, Integer> result = (Map<String, Integer>) obj;
                 return result;
             } else {
-                throw new RuntimeException("Invalid YAML file format. Expected a Map. Did you touch the doNotTouch.yml file? Regenerate it");
+                throw new RuntimeException("Invalid YAML file format. Expected a Map. Did you touch the builds.yml file? Regenerate it");
             }
         } catch (IOException e) {
-            throw new IOException("Error reading YAML file. Did you touch the doNotTouch.yml file? Regenerate it", e);
+            throw new IOException("Error reading YAML file. Did you touch the builds.yml file? Regenerate it", e);
         }
     }
 
