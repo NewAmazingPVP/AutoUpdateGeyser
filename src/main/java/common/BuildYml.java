@@ -18,11 +18,12 @@ public class BuildYml {
     public static void createYamlFile(String folder) {
         file = folder + "/builds.yml";
         Path filePath = Paths.get(file);
+        Path oldFilePath = Paths.get(folder + "/doNotTouch.yml");
 
         // for those who updated
-        if (Files.exists(Paths.get(folder + "/doNotTouch.yml"))) {
+        if (Files.exists(oldFilePath)) {
             try {
-                Files.delete(filePath);
+                Files.delete(oldFilePath);
                 System.out.println("AutoUpdateGeyser old doNotTouch.yml file detected. Deleting it and regenerating builds.yml file...");
             } catch (IOException e) {
                 e.printStackTrace();
