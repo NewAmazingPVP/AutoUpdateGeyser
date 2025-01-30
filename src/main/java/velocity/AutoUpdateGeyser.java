@@ -28,7 +28,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 import static common.BuildYml.createYamlFile;
 import static common.BuildYml.updateBuildNumber;
 
-@Plugin(id = "autoupdategeyser",name = "AutoUpdateGeyser",version = "4.5", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/",authors = "NewAmazingPVP")
+@Plugin(id = "autoupdategeyser",name = "AutoUpdateGeyser",version = "6.0", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/",authors = "NewAmazingPVP")
 public final class AutoUpdateGeyser {
 
     private Geyser m_geyser;

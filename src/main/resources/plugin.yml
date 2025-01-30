@@ -1,6 +1,8 @@
 name: AutoUpdateGeyser
 main: spigot.AutoUpdateGeyser
-version: '4.5'
+version: '6.0'
+# hackfix (definitely will not work as intended)
+folia-supported: true
 description: Plugin to automate updating of both Geyser and Floodgate
 author: 'NewAmazingPVP'
 commands:
