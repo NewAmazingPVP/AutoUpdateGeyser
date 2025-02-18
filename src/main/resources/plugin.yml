@@ -1,6 +1,6 @@
 name: AutoUpdateGeyser
 main: spigot.AutoUpdateGeyser
-version: '5.5'
+version: '6.5'
 description: Plugin to automate updating of both Geyser and Floodgate
 author: 'NewAmazingPVP'
 api-version: 1.13
