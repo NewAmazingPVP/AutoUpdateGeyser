@@ -1,5 +1,6 @@
 package spigot;
 
+import common.BuildYml;
 import common.Floodgate;
 import common.Geyser;
 
@@ -12,8 +13,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.Bukkit;
 
-import static common.BuildYml.createYamlFile;
-import static common.BuildYml.updateBuildNumber;
 
 public final class AutoUpdateGeyser extends JavaPlugin {
 
@@ -24,14 +23,16 @@ public final class AutoUpdateGeyser extends JavaPlugin {
     private Plugin ifFloodgate;
     private boolean configGeyser;
     private boolean configFloodgate;
+    private BuildYml buildYml;
 
     @Override
     public void onEnable() {
         new Metrics(this, 18445);
-        m_geyser = new Geyser();
-        m_floodgate = new Floodgate();
+        buildYml = new BuildYml(this.getLogger());
+        m_geyser = new Geyser(buildYml);
+        m_floodgate = new Floodgate(buildYml);
         loadConfiguration();
-        createYamlFile(getDataFolder().getAbsolutePath());
+        buildYml.createYamlFile(getDataFolder().getAbsolutePath());
         updateChecker();
         getCommand("updategeyser").setExecutor(new UpdateCommand());
     }
@@ -55,7 +56,7 @@ public final class AutoUpdateGeyser extends JavaPlugin {
 
     private void updatePlugin(String pluginName, Object pluginInstance, boolean configCheck) {
         if (pluginInstance == null && configCheck) {
-            updateBuildNumber(pluginName, -1);
+            buildYml.updateBuildNumber(pluginName, -1);
             if (updatePluginInstallation(pluginName)) {
                 getLogger().info(ChatColor.GREEN + pluginName + " has been installed for the first time." + ChatColor.YELLOW + " Please restart the server again to let it take effect.");
                 scheduleRestartIfAutoRestart();

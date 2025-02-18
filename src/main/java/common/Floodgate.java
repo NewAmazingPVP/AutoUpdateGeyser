@@ -7,10 +7,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.logging.Logger;
 
 import static common.BuildYml.*;
 
 public class Floodgate {
+
+    private final BuildYml buildYml;
+
+    public Floodgate(BuildYml buildYml) {
+        this.buildYml = buildYml;
+    }
 
     public void simpleUpdateFloodgate(String platform) {
         String latestVersionUrl;
@@ -40,17 +47,17 @@ public class Floodgate {
 
             JsonNode buildsNode = jsonNode.get("builds");
 
-            if (getDownloadedBuild("Floodgate") == -1) {
+            if (buildYml.getDownloadedBuild("Floodgate") == -1) {
                 simpleUpdateFloodgate(platform);
-                updateBuildNumber("Floodgate", getMaxBuildNumber(buildsNode));
+                buildYml.updateBuildNumber("Floodgate", buildYml.getMaxBuildNumber(buildsNode));
                 return true;
-            } else if(getDownloadedBuild("Floodgate") != getMaxBuildNumber(buildsNode)){
+            } else if(buildYml.getDownloadedBuild("Floodgate") != buildYml.getMaxBuildNumber(buildsNode)){
                 simpleUpdateFloodgate(platform);
-                updateBuildNumber("Floodgate", getMaxBuildNumber(buildsNode));
+                buildYml.updateBuildNumber("Floodgate", buildYml.getMaxBuildNumber(buildsNode));
                 return true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            buildYml.getLogger().info("Failed to update Floodgate: " + e.getMessage());
         }
         return false;
     }

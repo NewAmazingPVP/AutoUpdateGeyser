@@ -8,9 +8,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import static common.BuildYml.*;
-
 public class Geyser {
+    private final BuildYml buildYml;
+
+    public Geyser(BuildYml buildYml) {
+        this.buildYml = buildYml;
+    }
 
     public void simpleUpdateGeyser(String platform) {
         String latestVersionUrl;
@@ -37,17 +40,17 @@ public class Geyser {
 
             JsonNode buildsNode = jsonNode.get("builds");
 
-            if (getDownloadedBuild("Geyser") == -1) {
+            if (buildYml.getDownloadedBuild("Geyser") == -1) {
                 simpleUpdateGeyser(platform);
-                updateBuildNumber("Geyser", getMaxBuildNumber(buildsNode));
+                buildYml.updateBuildNumber("Geyser", buildYml.getMaxBuildNumber(buildsNode));
                 return true;
-            } else if (getDownloadedBuild("Geyser") != getMaxBuildNumber(buildsNode)) {
+            } else if (buildYml.getDownloadedBuild("Geyser") != buildYml.getMaxBuildNumber(buildsNode)) {
                 simpleUpdateGeyser(platform);
-                updateBuildNumber("Geyser", getMaxBuildNumber(buildsNode));
+                buildYml.updateBuildNumber("Geyser", buildYml.getMaxBuildNumber(buildsNode));
                 return true;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            buildYml.getLogger().info("Failed to update Geyser: " + e.getMessage());
         }
         return false;
     }

@@ -9,6 +9,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import common.BuildYml;
 import common.Floodgate;
 import common.Geyser;
 import com.velocitypowered.api.plugin.Plugin;
@@ -16,18 +17,17 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.logging.Logger;
 
-import static common.BuildYml.createYamlFile;
-import static common.BuildYml.updateBuildNumber;
 
-@Plugin(id = "autoupdategeyser",name = "AutoUpdateGeyser",version = "5.5", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/",authors = "NewAmazingPVP")
+@Plugin(id = "autoupdategeyser",name = "AutoUpdateGeyser",version = "6.5", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/",authors = "NewAmazingPVP")
 public final class AutoUpdateGeyser {
 
     private Geyser m_geyser;
@@ -40,6 +40,7 @@ public final class AutoUpdateGeyser {
     private PluginContainer ifFloodgate;
     private boolean configGeyser;
     private boolean configFloodgate;
+    private BuildYml buildYml;
 
     @Inject
     public AutoUpdateGeyser(ProxyServer proxy, @DataDirectory Path dataDirectory, Metrics.Factory metricsFactory) {
@@ -52,9 +53,10 @@ public final class AutoUpdateGeyser {
     @Subscribe
     public void onProxyInitialize(ProxyInitializeEvent event) {
         metricsFactory.make(this, 18448);
-        m_geyser = new Geyser();
-        m_floodgate = new Floodgate();
-        createYamlFile(dataDirectory.toAbsolutePath().toString());
+        buildYml = new BuildYml(Logger.getLogger("AutoUpdateGeyser"));
+        m_geyser = new Geyser(buildYml);
+        m_floodgate = new Floodgate(buildYml);
+        buildYml.createYamlFile(dataDirectory.toAbsolutePath().toString());
         updateChecker();
         CommandManager commandManager = proxy.getCommandManager();
         CommandMeta commandMeta = commandManager.metaBuilder("updategeyser")
@@ -82,7 +84,7 @@ public final class AutoUpdateGeyser {
 
     private void updatePlugin(String pluginName, Object pluginInstance, boolean configCheck) {
         if (pluginInstance == null && configCheck) {
-            updateBuildNumber(pluginName, -1);
+            buildYml.updateBuildNumber(pluginName, -1);
             if (updatePluginInstallation(pluginName)) {
                 proxy.getConsoleCommandSource().sendMessage(Component.text(pluginName + " has been installed for the first time. Please restart the server again to let it take effect.", NamedTextColor.GREEN));
                 scheduleRestartIfAutoRestart();
@@ -128,7 +130,7 @@ public final class AutoUpdateGeyser {
                     file.createNewFile();
                 }
             } catch (IOException exception) {
-                exception.printStackTrace();
+                Logger.getLogger("AutoUpdateGeyser").warning("Failed to create config file" + exception.getMessage());
                 return null;
             }
         }

@@ -1,5 +1,6 @@
 package bungeecord;
 
+import common.BuildYml;
 import common.Floodgate;
 import common.Geyser;
 import net.md_5.bungee.api.CommandSender;
@@ -15,9 +16,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
 
-import static common.BuildYml.createYamlFile;
-import static common.BuildYml.updateBuildNumber;
-
 public final class AutoUpdateGeyser extends Plugin {
 
     private Geyser m_geyser;
@@ -27,15 +25,17 @@ public final class AutoUpdateGeyser extends Plugin {
     private Plugin ifFloodgate;
     private boolean configGeyser;
     private boolean configFloodgate;
+    private BuildYml buildYml;
 
     @Override
     public void onEnable() {
         new Metrics(this, 18449);
-        m_geyser = new Geyser();
-        m_floodgate = new Floodgate();
+        buildYml = new BuildYml(this.getLogger());
+        m_geyser = new Geyser(buildYml);
+        m_floodgate = new Floodgate(buildYml);
         saveDefaultConfig();
         loadConfiguration();
-        createYamlFile(getDataFolder().getAbsolutePath());
+        buildYml.createYamlFile(getDataFolder().getAbsolutePath());
         updateChecker();
         ProxyServer.getInstance().getPluginManager().registerCommand(this, new UpdateCommand());
     }
@@ -59,7 +59,7 @@ public final class AutoUpdateGeyser extends Plugin {
 
     private void updatePlugin(String pluginName, Object pluginInstance, boolean configCheck) {
         if (pluginInstance == null && configCheck) {
-            updateBuildNumber(pluginName, -1);
+            buildYml.updateBuildNumber(pluginName, -1);
             if (updatePluginInstallation(pluginName)) {
                 getLogger().info(ChatColor.GREEN + pluginName + " has been installed for the first time." + ChatColor.YELLOW + " Please restart the server again to let it take effect.");
                 scheduleRestartIfAutoRestart();
@@ -96,7 +96,7 @@ public final class AutoUpdateGeyser extends Plugin {
             try (InputStream in = getClass().getResourceAsStream("/config.yml")) {
                 Files.copy(in, file.toPath());
             } catch (IOException e) {
-                e.printStackTrace();
+                this.getLogger().warning("Failed to create config file" + e.getMessage());
             }
         }
     }

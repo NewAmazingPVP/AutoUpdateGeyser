@@ -10,12 +10,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class BuildYml {
 
     public static String file;
+    private Logger logger;
 
-    public static void createYamlFile(String folder) {
+    public BuildYml(Logger logger) {
+        this.logger = logger;
+    }
+
+    public void createYamlFile(String folder) {
         file = folder + "/builds.yml";
         Path filePath = Paths.get(file);
         Path oldFilePath = Paths.get(folder + "/doNotTouch.yml");
@@ -24,9 +30,9 @@ public class BuildYml {
         if (Files.exists(oldFilePath)) {
             try {
                 Files.delete(oldFilePath);
-                System.out.println("AutoUpdateGeyser old doNotTouch.yml file detected. Deleting it and regenerating builds.yml file...");
+                logger.info("AutoUpdateGeyser old doNotTouch.yml file detected. Deleting it and regenerating builds.yml file...");
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.info("AutoUpdateGeyser failed to delete old doNotTouch.yml file...." + e.getMessage());
             }
         }
 
@@ -44,14 +50,14 @@ public class BuildYml {
             try (FileWriter writer = new FileWriter(filePath.toFile())) {
                 yaml.dump(initialData, writer);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.info("AutoUpdateGeyser failed to create builds.yml file...." + e.getMessage());
             }
         }
 
 
     }
 
-    public static void updateBuildNumber(String key, int newBuildNumber) {
+    public void updateBuildNumber(String key, int newBuildNumber) {
         try {
             Path filePath = Paths.get(file);
             Map<String, Integer> data = readYamlFile(filePath);
@@ -60,17 +66,17 @@ public class BuildYml {
                 data.put(key, newBuildNumber);
                 writeYamlFile(filePath, data);
                 if(newBuildNumber != -1) {
-                    System.out.println(key + " build number updated to " + newBuildNumber);
+                    logger.info(key + " build number updated to " + newBuildNumber);
                 }
             } else {
-                System.out.println(key + " not found in the YAML file. Did you touch the builds.yml file? Regenerate it");
+                logger.info(key + " not found in the YAML file. Did you touch the builds.yml file? Regenerate it");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.info("Error reading or writing YAML file. Did you touch the builds.yml file? Regenerate it" + e.getMessage());
         }
     }
 
-    public static int getDownloadedBuild(String key) {
+    public int getDownloadedBuild(String key) {
         try {
             Path filePath = Paths.get(file);
             Map<String, Integer> data = readYamlFile(filePath);
@@ -78,16 +84,16 @@ public class BuildYml {
             if (data.containsKey(key)) {
                 return data.get(key);
             } else {
-                System.out.println(key + " not found in the YAML file. Did you touch the builds.yml file? Regenerate it");
+                logger.info(key + " not found in the YAML file. Did you touch the builds.yml file? Regenerate it");
                 return -1;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.info("Error reading YAML file. Did you touch the builds.yml file? Regenerate it" + e.getMessage());
             return -1;
         }
     }
 
-    private static Map<String, Integer> readYamlFile(Path filePath) throws IOException {
+    private Map<String, Integer> readYamlFile(Path filePath) throws IOException {
         Yaml yaml = new Yaml();
         try {
             Object obj = yaml.load(Files.newBufferedReader(filePath));
@@ -102,7 +108,7 @@ public class BuildYml {
         }
     }
 
-    private static void writeYamlFile(Path filePath, Map<String, Integer> data) throws IOException {
+    private void writeYamlFile(Path filePath, Map<String, Integer> data) throws IOException {
         DumperOptions options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 
@@ -113,7 +119,7 @@ public class BuildYml {
         }
     }
 
-    public static int getMaxBuildNumber(JsonNode buildsNode) {
+    public int getMaxBuildNumber(JsonNode buildsNode) {
         int maxBuildNumber = Integer.MIN_VALUE;
 
         for (JsonNode buildNode : buildsNode) {
@@ -122,5 +128,9 @@ public class BuildYml {
         }
 
         return maxBuildNumber;
+    }
+
+    public Logger getLogger() {
+        return logger;
     }
 }
