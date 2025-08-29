@@ -1,5 +1,6 @@
 package velocity;
 
+import com.google.inject.Inject;
 import com.moandjiezana.toml.Toml;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
@@ -7,17 +8,16 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.ProxyServer;
 import common.BuildYml;
 import common.Floodgate;
 import common.Geyser;
-import com.velocitypowered.api.plugin.Plugin;
-import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import com.google.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,15 +27,15 @@ import java.time.Duration;
 import java.util.logging.Logger;
 
 
-@Plugin(id = "autoupdategeyser",name = "AutoUpdateGeyser",version = "6.5", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/",authors = "NewAmazingPVP")
+@Plugin(id = "autoupdategeyser", name = "AutoUpdateGeyser", version = "7.0.0", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/", authors = "NewAmazingPVP")
 public final class AutoUpdateGeyser {
 
     private Geyser m_geyser;
     private Floodgate m_floodgate;
-    private Toml config;
-    private ProxyServer proxy;
+    private final Toml config;
+    private final ProxyServer proxy;
     private final Metrics.Factory metricsFactory;
-    private Path dataDirectory;
+    private final Path dataDirectory;
     private PluginContainer ifGeyser;
     private PluginContainer ifFloodgate;
     private boolean configGeyser;
@@ -98,11 +98,14 @@ public final class AutoUpdateGeyser {
     }
 
     private boolean updatePluginInstallation(String pluginName) {
-        return switch (pluginName) {
-            case "Geyser" -> m_geyser.updateGeyser("velocity");
-            case "Floodgate" -> m_floodgate.updateFloodgate("velocity");
-            default -> false;
-        };
+        switch (pluginName) {
+            case "Geyser":
+                return m_geyser.updateGeyser("velocity");
+            case "Floodgate":
+                return m_floodgate.updateFloodgate("velocity");
+            default:
+                return false;
+        }
     }
 
     private void scheduleRestartIfAutoRestart() {
@@ -130,8 +133,8 @@ public final class AutoUpdateGeyser {
                     file.createNewFile();
                 }
             } catch (IOException exception) {
-                Logger.getLogger("AutoUpdateGeyser").warning("Failed to create config file" + exception.getMessage());
-                return null;
+                Logger.getLogger("AutoUpdateGeyser").warning("Failed to create config file: " + exception.getMessage());
+                return new Toml();
             }
         }
         return new Toml().read(file);
@@ -142,6 +145,7 @@ public final class AutoUpdateGeyser {
         public boolean hasPermission(final Invocation invocation) {
             return invocation.source().hasPermission("autoupdategeyser.admin");
         }
+
         @Override
         public void execute(Invocation invocation) {
             CommandSource source = invocation.source();

@@ -14,19 +14,16 @@ import java.util.logging.Logger;
 
 public class BuildYml {
 
-    public static String file;
-    private Logger logger;
+    private Path filePath;
+    private final Logger logger;
 
     public BuildYml(Logger logger) {
         this.logger = logger;
     }
 
     public void createYamlFile(String folder) {
-        file = folder + "/builds.yml";
-        Path filePath = Paths.get(file);
-        Path oldFilePath = Paths.get(folder + "/doNotTouch.yml");
-
-        // for those who updated
+        this.filePath = Paths.get(folder, "builds.yml");
+        Path oldFilePath = Paths.get(folder, "doNotTouch.yml");
         if (Files.exists(oldFilePath)) {
             try {
                 Files.delete(oldFilePath);
@@ -35,37 +32,29 @@ public class BuildYml {
                 logger.info("AutoUpdateGeyser failed to delete old doNotTouch.yml file...." + e.getMessage());
             }
         }
-
-        if (!Files.exists(filePath)) {
+        if (!Files.exists(this.filePath)) {
             DumperOptions options = new DumperOptions();
             options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-
             Yaml yaml = new Yaml(options);
-
-            Map<String, Integer> initialData = Map.ofEntries(
-                        Map.entry("Geyser", -1),
-                        Map.entry("Floodgate", -1)
-                );
-
-            try (FileWriter writer = new FileWriter(filePath.toFile())) {
+            java.util.HashMap<String, Integer> initialData = new java.util.HashMap<String, Integer>();
+            initialData.put("Geyser", -1);
+            initialData.put("Floodgate", -1);
+            try (FileWriter writer = new FileWriter(this.filePath.toFile())) {
                 yaml.dump(initialData, writer);
             } catch (IOException e) {
                 logger.info("AutoUpdateGeyser failed to create builds.yml file...." + e.getMessage());
             }
         }
-
-
     }
 
     public void updateBuildNumber(String key, int newBuildNumber) {
         try {
-            Path filePath = Paths.get(file);
-            Map<String, Integer> data = readYamlFile(filePath);
-
+            ensureFilePath();
+            Map<String, Integer> data = readYamlFile(this.filePath);
             if (data.containsKey(key)) {
                 data.put(key, newBuildNumber);
-                writeYamlFile(filePath, data);
-                if(newBuildNumber != -1) {
+                writeYamlFile(this.filePath, data);
+                if (newBuildNumber != -1) {
                     logger.info(key + " build number updated to " + newBuildNumber);
                 }
             } else {
@@ -78,9 +67,8 @@ public class BuildYml {
 
     public int getDownloadedBuild(String key) {
         try {
-            Path filePath = Paths.get(file);
-            Map<String, Integer> data = readYamlFile(filePath);
-
+            ensureFilePath();
+            Map<String, Integer> data = readYamlFile(this.filePath);
             if (data.containsKey(key)) {
                 return data.get(key);
             } else {
@@ -111,9 +99,7 @@ public class BuildYml {
     private void writeYamlFile(Path filePath, Map<String, Integer> data) throws IOException {
         DumperOptions options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-
         Yaml yaml = new Yaml(options);
-
         try (FileWriter writer = new FileWriter(filePath.toFile())) {
             yaml.dump(data, writer);
         }
@@ -121,16 +107,20 @@ public class BuildYml {
 
     public int getMaxBuildNumber(JsonNode buildsNode) {
         int maxBuildNumber = Integer.MIN_VALUE;
-
         for (JsonNode buildNode : buildsNode) {
             int buildNumber = buildNode.asInt();
             maxBuildNumber = Math.max(maxBuildNumber, buildNumber);
         }
-
         return maxBuildNumber;
     }
 
     public Logger getLogger() {
         return logger;
+    }
+
+    private void ensureFilePath() throws IOException {
+        if (this.filePath == null) {
+            throw new IOException("builds.yml not initialized. Call createYamlFile() first.");
+        }
     }
 }

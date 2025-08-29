@@ -3,6 +3,7 @@ package bungeecord;
 import common.BuildYml;
 import common.Floodgate;
 import common.Geyser;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Command;
@@ -10,9 +11,10 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
-import net.md_5.bungee.api.ChatColor;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
 
@@ -73,11 +75,14 @@ public final class AutoUpdateGeyser extends Plugin {
     }
 
     private boolean updatePluginInstallation(String pluginName) {
-        return switch (pluginName) {
-            case "Geyser" -> m_geyser.updateGeyser("bungeecord");
-            case "Floodgate" -> m_floodgate.updateFloodgate("bungeecord");
-            default -> false;
-        };
+        switch (pluginName) {
+            case "Geyser":
+                return m_geyser.updateGeyser("bungeecord");
+            case "Floodgate":
+                return m_floodgate.updateFloodgate("bungeecord");
+            default:
+                return false;
+        }
     }
 
     private void scheduleRestartIfAutoRestart() {
@@ -100,6 +105,7 @@ public final class AutoUpdateGeyser extends Plugin {
             }
         }
     }
+
     private void loadConfiguration() {
         File file = new File(getDataFolder(), "config.yml");
         try {
