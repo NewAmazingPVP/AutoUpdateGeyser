@@ -15,19 +15,27 @@ public class Geyser {
         this.buildYml = buildYml;
     }
 
-    public void simpleUpdateGeyser(String platform) {
+    public boolean simpleUpdateGeyser(String platform) {
         String latestVersionUrl;
         latestVersionUrl = "https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/" + platform;
         String outputFilePath = "plugins/Geyser-" + platform + ".jar";
 
-        try (InputStream in = new URL(latestVersionUrl).openStream();
-             FileOutputStream out = new FileOutputStream(outputFilePath)) {
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = in.read(buffer)) != -1) {
-                out.write(buffer, 0, bytesRead);
+        try (InputStream in = new URL(latestVersionUrl).openStream()) {
+            java.io.File outFile = new java.io.File(outputFilePath);
+            if (outFile.getParentFile() != null) {
+                outFile.getParentFile().mkdirs();
             }
-        } catch (IOException ignored) {
+            try (FileOutputStream out = new FileOutputStream(outFile)) {
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, bytesRead);
+                }
+            }
+            return true;
+        } catch (IOException e) {
+            buildYml.getLogger().info("Failed to download Geyser jar: " + e.getMessage());
+            return false;
         }
     }
 
@@ -41,13 +49,15 @@ public class Geyser {
             JsonNode buildsNode = jsonNode.get("builds");
 
             if (buildYml.getDownloadedBuild("Geyser") == -1) {
-                simpleUpdateGeyser(platform);
-                buildYml.updateBuildNumber("Geyser", buildYml.getMaxBuildNumber(buildsNode));
-                return true;
+                if (simpleUpdateGeyser(platform)) {
+                    buildYml.updateBuildNumber("Geyser", buildYml.getMaxBuildNumber(buildsNode));
+                    return true;
+                }
             } else if (buildYml.getDownloadedBuild("Geyser") != buildYml.getMaxBuildNumber(buildsNode)) {
-                simpleUpdateGeyser(platform);
-                buildYml.updateBuildNumber("Geyser", buildYml.getMaxBuildNumber(buildsNode));
-                return true;
+                if (simpleUpdateGeyser(platform)) {
+                    buildYml.updateBuildNumber("Geyser", buildYml.getMaxBuildNumber(buildsNode));
+                    return true;
+                }
             }
         } catch (Exception e) {
             buildYml.getLogger().info("Failed to update Geyser: " + e.getMessage());

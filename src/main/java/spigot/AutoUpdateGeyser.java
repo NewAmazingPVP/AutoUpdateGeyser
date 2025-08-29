@@ -3,7 +3,7 @@ package spigot;
 import common.BuildYml;
 import common.Floodgate;
 import common.Geyser;
-
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -11,8 +11,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.Bukkit;
-
 
 public final class AutoUpdateGeyser extends JavaPlugin {
 
@@ -34,7 +32,11 @@ public final class AutoUpdateGeyser extends JavaPlugin {
         loadConfiguration();
         buildYml.createYamlFile(getDataFolder().getAbsolutePath());
         updateChecker();
-        getCommand("updategeyser").setExecutor(new UpdateCommand());
+        if (getCommand("updategeyser") != null) {
+            getCommand("updategeyser").setExecutor(new UpdateCommand());
+        } else {
+            getLogger().warning("Command 'updategeyser' not registered in plugin.yml");
+        }
     }
 
     public void updateChecker() {
@@ -45,13 +47,10 @@ public final class AutoUpdateGeyser extends JavaPlugin {
         configGeyser = config.getBoolean("updates.geyser");
         configFloodgate = config.getBoolean("updates.floodgate");
 
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
-            @Override
-            public void run() {
-                updatePlugin("Geyser", ifGeyser, configGeyser);
-                updatePlugin("Floodgate", ifFloodgate, configFloodgate);
-            }
-        }, bootDelay *20L, 20L * 60L * interval);
+        SchedulerCompat.scheduleUpdateRepeating(this, () -> {
+            updatePlugin("Geyser", ifGeyser, configGeyser);
+            updatePlugin("Floodgate", ifFloodgate, configFloodgate);
+        }, bootDelay, interval);
     }
 
     private void updatePlugin(String pluginName, Object pluginInstance, boolean configCheck) {
@@ -70,37 +69,42 @@ public final class AutoUpdateGeyser extends JavaPlugin {
     }
 
     private boolean updatePluginInstallation(String pluginName) {
-        return switch (pluginName) {
-            case "Geyser" -> m_geyser.updateGeyser("spigot");
-            case "Floodgate" -> m_floodgate.updateFloodgate("spigot");
-            default -> false;
-        };
+        switch (pluginName) {
+            case "Geyser":
+                return m_geyser.updateGeyser("spigot");
+            case "Floodgate":
+                return m_floodgate.updateFloodgate("spigot");
+            default:
+                return false;
+        }
     }
 
     private void scheduleRestartIfAutoRestart() {
         if (config.getBoolean("updates.autoRestart")) {
             getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', config.getString("updates.restartMessage")));
-            Bukkit.getScheduler().runTaskLater(this, () -> getServer().dispatchCommand(getServer().getConsoleSender(), "restart"), config.getInt("updates.restartDelay"));
+            long delaySeconds = config.getInt("updates.restartDelay");
+            SchedulerCompat.scheduleConsoleRestart(this, () ->
+                            getServer().dispatchCommand(getServer().getConsoleSender(), "restart"),
+                    delaySeconds
+            );
         }
     }
 
-    public void loadConfiguration(){
+    public void loadConfiguration() {
         saveDefaultConfig();
-
         config = getConfig();
-
         config.addDefault("updates.geyser", true);
-        config.addDefault("updates.floodgate", false);
+        config.addDefault("updates.floodgate", true);
         config.addDefault("updates.interval", 60);
         config.addDefault("updates.bootTime", 5);
         config.addDefault("updates.autoRestart", false);
-
+        config.addDefault("updates.restartDelay", 60);
+        config.addDefault("updates.restartMessage", "Server is restarting shortly!");
         config.options().copyDefaults(true);
         saveConfig();
     }
 
     public class UpdateCommand implements CommandExecutor {
-
         @Override
         public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
             updatePlugin("Geyser", ifGeyser, configGeyser);
