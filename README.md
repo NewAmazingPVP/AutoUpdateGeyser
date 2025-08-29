@@ -1,82 +1,153 @@
-# AutoUpdateGeyser
+<div align="center">
 
-Automated updates for Geyser and Floodgate across Spigot/Paper/Folia, BungeeCord, and Velocity.
+# AutoUpdateGeyser v7.0.0
 
-[![Build](https://github.com/NewAmazingPVP/AutoUpdateGeyser/actions/workflows/build.yml/badge.svg)](../../actions)
+Keep Geyser and Floodgate up-to-date — automatically and safely.
 
-Spigot page: https://www.spigotmc.org/resources/autoupdategeyser.109632/
+[![SpigotMC](https://img.shields.io/badge/SpigotMC-Resource-orange)](https://www.spigotmc.org/resources/autoupdategeyser.109632/)
+![Platforms](https://img.shields.io/badge/Platforms-Spigot%20%7C%20Paper%20%7C%20Folia%20%7C%20Velocity%20%7C%20BungeeCord-5A67D8)
+![MC](https://img.shields.io/badge/Minecraft-1.8%E2%86%92Latest-2EA043)
+![Java](https://img.shields.io/badge/Java-8%2B-1F6FEB)
+![License](https://img.shields.io/badge/License-MIT-0E8A16)
+
+</div>
+
+> TL;DR
+> Drop the jar in plugins/, choose whether to manage Geyser and/or Floodgate, and the plugin will fetch new builds on a schedule. Optional restart after download.
+
+---
+
+## Table of Contents
+
+* [Highlights](#highlights)
+* [Supported Platforms](#supported-platforms)
+* [Requirements](#requirements)
+* [Installation](#installation)
+* [Quick Start](#quick-start)
+* [Configuration](#configuration)
+* [Commands & Permissions](#commands--permissions)
+* [How It Works](#how-it-works)
+* [Building from Source](#building-from-source)
+* [License](#license)
+
+---
 
 ## Highlights
 
-- Folia-aware scheduling on Spigot/Paper with safe Bukkit fallback.
-- Works on Spigot/Paper/Folia, BungeeCord/Waterfall, and Velocity.
-- Periodic checks download the latest Geyser/Floodgate builds.
-- First‑time install support for missing plugins (when enabled).
-- Unified restart options and messaging across all platforms.
-- One command everywhere: `/updategeyser` (permission: `autoupdategeyser.admin`).
+* Uses the official GeyserMC download API for both Geyser and Floodgate.
+* First-time install: can download missing jars if enabled in config.
+* Non-blocking update checks; Folia-safe scheduling on Spigot/Paper.
+* Optional broadcast + delayed restart after successful downloads.
+* Works across Spigot, Paper, Folia, Velocity, and BungeeCord.
 
-## Version
+## Supported Platforms
 
-- Current: v7.0.0 (Semantic Versioning)
+* Spigot
 
-## Java & Platform Support
+* Paper
 
-- Builds on Java 8 and Java 17 in CI.
-    - Java 8 build: Spigot/Paper/Folia + BungeeCord artifact (Velocity sources excluded for maximum compatibility).
-    - Java 17 build: Full artifact including Velocity support.
-- Runtime expectations:
-    - Spigot/Paper: Java 8+ (Folia requires modern Java on the server).
-    - BungeeCord/Waterfall: Java 8+
-    - Velocity: Java 11+ (server requirement), tested on 3.1+
+* Folia
+
+* Velocity
+
+* BungeeCord (and Waterfall)
+
+## Requirements
+
+* Java 8 or newer.
+
+* Internet access to reach the GeyserMC download endpoints.
+
+Notes:
+
+* Folia requires a modern Paper/Folia server build. This plugin uses Folia-safe schedulers where required.
+
+* Velocity generally runs on Java 11+; this plugin’s Velocity module targets Velocity 3.1+.
+
+## Installation
+
+1. Download the latest jar from the [Spigot resource page](https://www.spigotmc.org/resources/autoupdategeyser.109632/).
+
+2. Place it into your server/proxy `plugins/` folder.
+
+3. Start the server to generate the default configuration.
+
+4. Edit the config (see below) and restart if desired.
+
+## Quick Start
+
+1. Decide which components to manage:
+
+   * `updates.geyser: true|false`
+
+   * `updates.floodgate: true|false`
+
+2. Keep the default interval (60 minutes) or set your own.
+
+3. Optional: enable `updates.autoRestart` and set a `restartDelay`.
+
+4. Trigger a manual check: `/updategeyser` (permission: `autoupdategeyser.admin`).
 
 ## Configuration
 
-All platforms share the same keys.
+Configuration files are per-platform but share the same keys.
 
-Common options:
+Spigot/Paper/Folia and BungeeCord (`config.yml`):
 
-- `updates.geyser` (bool): Enable Geyser updates. Default: `true`
-- `updates.floodgate` (bool): Enable Floodgate updates. Default: `true`
-- `updates.interval` (minutes): Check interval. Default: `60`
-- `updates.bootTime` (seconds): Startup delay before first check. Default: `5`
-- `updates.autoRestart` (bool): Restart after a successful update. Default: `false`
-- `updates.restartDelay` (seconds): Delay between warning and restart. Default: `60`
-- `updates.restartMessage` (string): Broadcast when scheduling restart.
+```yaml
+updates:
+  geyser: true
+  floodgate: true
+  interval: 60          # minutes
+  bootTime: 5           # seconds after startup before first check
+  autoRestart: false
+  restartDelay: 60      # seconds
+  restartMessage: "Server is restarting shortly!"
+```
 
-Files by platform:
+Velocity (`config.toml`):
 
-- Spigot/Paper/Folia: `plugins/AutoUpdateGeyser/config.yml`
-- BungeeCord: `plugins/AutoUpdateGeyser/config.yml`
-- Velocity: `plugins/autoupdategeyser/config.toml`
+```toml
+[updates]
+geyser = true
+floodgate = true
+interval = 60          # minutes
+bootTime = 5           # seconds after startup before first check
+autoRestart = false
+restartDelay = 60      # seconds
+restartMessage = "Server is restarting shortly!"
+```
 
-## Command
+## Commands & Permissions
 
-- `/updategeyser` — Runs an immediate update check for Geyser and Floodgate.
-    - Permission: `autoupdategeyser.admin`
+* `/updategeyser` — Runs an immediate update check for Geyser and Floodgate.
+
+  * Permission: `autoupdategeyser.admin`
 
 ## How It Works
 
-- On a schedule, the plugin checks the official GeyserMC download API for new builds of Geyser and Floodgate.
-- If an update (or missing install) is detected for an enabled target, it downloads the latest jar into `plugins/`.
-- If `autoRestart` is enabled, it broadcasts `restartMessage` and restarts after `restartDelay` seconds.
-    - Spigot/Paper/Folia: runs `restart`
-    - BungeeCord: runs `end`
-    - Velocity: runs `shutdown`
+* On a schedule, the plugin queries the GeyserMC API for the latest build numbers.
 
-## CI/CD
+* If a new build is available (or the plugin is missing), it downloads the correct platform jar to `plugins/`.
 
-Every push builds on Java 8 and 17. Artifacts are uploaded for each. Tagging a release `v*` publishes a GitHub Release
-with the jar attached.
+* The last applied build is tracked in `builds.yml` inside the plugin data folder.
 
-## Changelog (since 6.x)
+* If `autoRestart` is enabled, the plugin broadcasts `restartMessage` and restarts after `restartDelay` seconds.
 
-- Added Folia support via scheduler compatibility.
-- Made Metrics Folia-safe on Spigot.
-- Fixed Spigot restart delay units (seconds).
-- Prevent false positives when a download fails.
-- Normalized defaults across platforms; safer build tracking.
-- Java 8 compatible sources; Velocity included on Java 11+ builds.
+  * Spigot/Paper/Folia: runs `restart`
+
+  * BungeeCord: runs `end`
+
+  * Velocity: runs `shutdown`
+
+## Building from Source
+
+Build with Maven:
+
+```bash
+mvn -DskipTests package
+```
 
 ## License
 
-AutoUpdateGeyser is released under the MIT License. See `LICENSE` for details.
+AutoUpdateGeyser is licensed under the MIT License. See `LICENSE` for details.
