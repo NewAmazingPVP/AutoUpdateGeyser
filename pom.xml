@@ -118,20 +118,23 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                        <version>3.4.0</version>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
                         <executions>
                             <execution>
-                                <id>exclude-velocity-sources</id>
-                                <phase>generate-sources</phase>
+                                <phase>package</phase>
                                 <goals>
-                                    <goal>remove-source</goal>
+                                    <goal>run</goal>
                                 </goals>
                                 <configuration>
-                                    <sources>
-                                        <source>src/main/java/velocity</source>
-                                    </sources>
+                                    <target>
+                                        <copy file="${project.build.directory}/${project.build.finalName}.jar" todir="C:/Plugins Testing/Bungeecord/plugins"/>
+                                        <copy file="${project.build.directory}/${project.build.finalName}.jar" todir="C:/Plugins Testing/Folia/plugins"/>
+                                        <copy file="${project.build.directory}/${project.build.finalName}.jar" todir="C:/Plugins Testing/Paper/plugins"/>
+                                        <copy file="${project.build.directory}/${project.build.finalName}.jar" todir="C:/Plugins Testing/Spigot/plugins"/>
+                                        <copy file="${project.build.directory}/${project.build.finalName}.jar" todir="C:/Plugins Testing/Velocity/plugins"/>
+                                    </target>
                                 </configuration>
                             </execution>
                         </executions>
