@@ -1,10 +1,9 @@
 <div align="center">
 
-# AutoUpdateGeyser v7.0.0
+# AutoUpdateGeyser v7.1.0
 
-Keep Geyser and Floodgate up-to-date — automatically and safely.
+Keep Geyser and Floodgate up-to-date - automatically and safely.
 
-[![SpigotMC](https://img.shields.io/badge/SpigotMC-Resource-orange)](https://www.spigotmc.org/resources/autoupdategeyser.109632/)
 ![Platforms](https://img.shields.io/badge/Platforms-Spigot%20%7C%20Paper%20%7C%20Folia%20%7C%20Velocity%20%7C%20BungeeCord-5A67D8)
 ![MC](https://img.shields.io/badge/Minecraft-1.8%E2%86%92Latest-2EA043)
 ![Java](https://img.shields.io/badge/Java-8%2B-1F6FEB)
@@ -13,7 +12,8 @@ Keep Geyser and Floodgate up-to-date — automatically and safely.
 </div>
 
 > TL;DR
-> Drop the jar in plugins/, choose whether to manage Geyser and/or Floodgate, and the plugin will fetch new builds on a schedule. Optional restart after download.
+> Drop the jar in plugins/, choose whether to manage Geyser and/or Floodgate, and the plugin will fetch new builds on a
+> schedule. Optional restart after download.
 
 ---
 
@@ -78,9 +78,9 @@ Notes:
 
 1. Decide which components to manage:
 
-   * `updates.geyser: true|false`
+    * `updates.geyser: true|false`
 
-   * `updates.floodgate: true|false`
+    * `updates.floodgate: true|false`
 
 2. Keep the default interval (60 minutes) or set your own.
 
@@ -120,9 +120,9 @@ restartMessage = "Server is restarting shortly!"
 
 ## Commands & Permissions
 
-* `/updategeyser` — Runs an immediate update check for Geyser and Floodgate.
+* `/updategeyser` - Runs an immediate update check for Geyser and Floodgate.
 
-  * Permission: `autoupdategeyser.admin`
+    * Permission: `autoupdategeyser.admin`
 
 ## How It Works
 
@@ -134,11 +134,11 @@ restartMessage = "Server is restarting shortly!"
 
 * If `autoRestart` is enabled, the plugin broadcasts `restartMessage` and restarts after `restartDelay` seconds.
 
-  * Spigot/Paper/Folia: runs `restart`
+    * Spigot/Paper/Folia: runs `restart`
 
-  * BungeeCord: runs `end`
+    * BungeeCord: runs `end`
 
-  * Velocity: runs `shutdown`
+    * Velocity: runs `shutdown`
 
 ## Building from Source
 

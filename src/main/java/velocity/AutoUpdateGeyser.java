@@ -27,7 +27,7 @@ import java.time.Duration;
 import java.util.logging.Logger;
 
 
-@Plugin(id = "autoupdategeyser", name = "AutoUpdateGeyser", version = "7.0.0", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/", authors = "NewAmazingPVP")
+@Plugin(id = "autoupdategeyser", name = "AutoUpdateGeyser", version = "7.1.0", url = "https://www.spigotmc.org/resources/autoupdategeyser.109632/", authors = "NewAmazingPVP")
 public final class AutoUpdateGeyser {
 
     private Geyser m_geyser;

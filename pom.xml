@@ -6,7 +6,7 @@
 
     <groupId>newamazingpvp</groupId>
     <artifactId>AutoUpdateGeyser</artifactId>
-    <version>7.0.0</version>
+    <version>7.1.0</version>
     <packaging>jar</packaging>
 
     <name>AutoUpdateGeyser</name>
@@ -57,11 +57,16 @@
                         </goals>
                         <configuration>
                             <target>
-                                <copy file="${project.build.directory}/${project.build.finalName}.jar" todir="C:/Plugins Testing/Bungeecord/plugins"/>
-                                <copy file="${project.build.directory}/${project.build.finalName}.jar" todir="C:/Plugins Testing/Folia/plugins"/>
-                                <copy file="${project.build.directory}/${project.build.finalName}.jar" todir="C:/Plugins Testing/Paper/plugins"/>
-                                <copy file="${project.build.directory}/${project.build.finalName}.jar" todir="C:/Plugins Testing/Spigot/plugins"/>
-                                <copy file="${project.build.directory}/${project.build.finalName}.jar" todir="C:/Plugins Testing/Velocity/plugins"/>
+                                <copy file="${project.build.directory}/${project.build.finalName}.jar"
+                                      todir="C:/Plugins Testing/Bungeecord/plugins"/>
+                                <copy file="${project.build.directory}/${project.build.finalName}.jar"
+                                      todir="C:/Plugins Testing/Folia/plugins"/>
+                                <copy file="${project.build.directory}/${project.build.finalName}.jar"
+                                      todir="C:/Plugins Testing/Paper/plugins"/>
+                                <copy file="${project.build.directory}/${project.build.finalName}.jar"
+                                      todir="C:/Plugins Testing/Spigot/plugins"/>
+                                <copy file="${project.build.directory}/${project.build.finalName}.jar"
+                                      todir="C:/Plugins Testing/Velocity/plugins"/>
                             </target>
                         </configuration>
                     </execution>
