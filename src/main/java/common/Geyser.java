@@ -4,11 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.Locale;
 
 public class Geyser {
@@ -19,31 +15,22 @@ public class Geyser {
     }
 
     public boolean simpleUpdateGeyser(String platform) {
+        return simpleUpdateGeyser(platform, new File("plugins"));
+    }
+
+    public boolean simpleUpdateGeyser(String platform, File outputDirectory) {
         String latestVersionUrl;
         latestVersionUrl = "https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/" + platform;
         String outputFileName = resolveOutputFileName(platform);
 
-        try (InputStream in = new URL(latestVersionUrl).openStream()) {
-            File outFile = new File("plugins", outputFileName);
-            if (outFile.getParentFile() != null) {
-                outFile.getParentFile().mkdirs();
-            }
-            clearCaseInsensitiveDuplicates(outFile);
-            try (FileOutputStream out = new FileOutputStream(outFile)) {
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-                while ((bytesRead = in.read(buffer)) != -1) {
-                    out.write(buffer, 0, bytesRead);
-                }
-            }
-            return true;
-        } catch (IOException e) {
-            buildYml.getLogger().info("Failed to download Geyser jar: " + e.getMessage());
-            return false;
-        }
+        return JarDownloadUtil.downloadJar(buildYml, latestVersionUrl, outputDirectory, outputFileName, "Geyser");
     }
 
     public boolean updateGeyser(String platform) {
+        return updateGeyser(platform, new File("plugins"));
+    }
+
+    public boolean updateGeyser(String platform, File outputDirectory) {
         String apiUrl = "https://download.geysermc.org/v2/projects/geyser/versions/latest";
 
         try {
@@ -53,12 +40,12 @@ public class Geyser {
             JsonNode buildsNode = jsonNode.get("builds");
 
             if (buildYml.getDownloadedBuild("Geyser") == -1) {
-                if (simpleUpdateGeyser(platform)) {
+                if (simpleUpdateGeyser(platform, outputDirectory)) {
                     buildYml.updateBuildNumber("Geyser", buildYml.getMaxBuildNumber(buildsNode));
                     return true;
                 }
             } else if (buildYml.getDownloadedBuild("Geyser") != buildYml.getMaxBuildNumber(buildsNode)) {
-                if (simpleUpdateGeyser(platform)) {
+                if (simpleUpdateGeyser(platform, outputDirectory)) {
                     buildYml.updateBuildNumber("Geyser", buildYml.getMaxBuildNumber(buildsNode));
                     return true;
                 }
@@ -82,26 +69,6 @@ public class Geyser {
                 return "Geyser-Standalone.jar";
             default:
                 return "Geyser-" + (platform == null ? "" : platform) + ".jar";
-        }
-    }
-
-    private void clearCaseInsensitiveDuplicates(File target) throws IOException {
-        Files.deleteIfExists(target.toPath());
-
-        File parent = target.getParentFile();
-        if (parent == null || !parent.exists()) {
-            return;
-        }
-
-        File[] siblings = parent.listFiles();
-        if (siblings == null) {
-            return;
-        }
-
-        for (File sibling : siblings) {
-            if (sibling.getName().equalsIgnoreCase(target.getName())) {
-                Files.deleteIfExists(sibling.toPath());
-            }
         }
     }
 }

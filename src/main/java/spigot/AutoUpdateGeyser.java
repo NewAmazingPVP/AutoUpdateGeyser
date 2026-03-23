@@ -12,6 +12,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+
 public final class AutoUpdateGeyser extends JavaPlugin {
 
     private Geyser m_geyser;
@@ -56,27 +58,36 @@ public final class AutoUpdateGeyser extends JavaPlugin {
     private void updatePlugin(String pluginName, Object pluginInstance, boolean configCheck) {
         if (pluginInstance == null && configCheck) {
             buildYml.updateBuildNumber(pluginName, -1);
-            if (updatePluginInstallation(pluginName)) {
+            if (updatePluginInstallation(pluginName, pluginInstance)) {
                 getLogger().info(ChatColor.GREEN + pluginName + " has been installed for the first time." + ChatColor.YELLOW + " Please restart the server again to let it take effect.");
                 scheduleRestartIfAutoRestart();
             }
         } else if (configCheck) {
-            if (updatePluginInstallation(pluginName)) {
+            if (updatePluginInstallation(pluginName, pluginInstance)) {
                 getLogger().info(ChatColor.GREEN + "New update of " + pluginName + " was downloaded." + ChatColor.YELLOW + " Please restart to let it take effect.");
                 scheduleRestartIfAutoRestart();
             }
         }
     }
 
-    private boolean updatePluginInstallation(String pluginName) {
+    private boolean updatePluginInstallation(String pluginName, Object pluginInstance) {
+        File downloadDirectory = resolveDownloadDirectory(pluginInstance);
         switch (pluginName) {
             case "Geyser":
-                return m_geyser.updateGeyser("spigot");
+                return m_geyser.updateGeyser("spigot", downloadDirectory);
             case "Floodgate":
-                return m_floodgate.updateFloodgate("spigot");
+                return m_floodgate.updateFloodgate("spigot", downloadDirectory);
             default:
                 return false;
         }
+    }
+
+    private File resolveDownloadDirectory(Object pluginInstance) {
+        if (pluginInstance != null) {
+            // Let Spigot swap the jar on restart instead of overwriting a loaded plugin on Windows.
+            return Bukkit.getUpdateFolderFile();
+        }
+        return new File("plugins");
     }
 
     private void scheduleRestartIfAutoRestart() {
