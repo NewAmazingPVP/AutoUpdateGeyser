@@ -3,6 +3,7 @@ package spigot;
 import common.BuildYml;
 import common.Floodgate;
 import common.Geyser;
+import common.RestartGate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -24,6 +25,7 @@ public final class AutoUpdateGeyser extends JavaPlugin {
     private boolean configGeyser;
     private boolean configFloodgate;
     private BuildYml buildYml;
+    private final RestartGate restartGate = new RestartGate();
 
     @Override
     public void onEnable() {
@@ -91,7 +93,7 @@ public final class AutoUpdateGeyser extends JavaPlugin {
     }
 
     private void scheduleRestartIfAutoRestart() {
-        if (config.getBoolean("updates.autoRestart")) {
+        if (config.getBoolean("updates.autoRestart") && restartGate.markScheduled()) {
             getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', config.getString("updates.restartMessage")));
             long delaySeconds = config.getInt("updates.restartDelay");
             SchedulerCompat.scheduleConsoleRestart(this, () ->

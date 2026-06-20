@@ -15,6 +15,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import common.BuildYml;
 import common.Floodgate;
 import common.Geyser;
+import common.RestartGate;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -41,6 +42,7 @@ public final class AutoUpdateGeyser {
     private boolean configGeyser;
     private boolean configFloodgate;
     private BuildYml buildYml;
+    private final RestartGate restartGate = new RestartGate();
 
     @Inject
     public AutoUpdateGeyser(ProxyServer proxy, @DataDirectory Path dataDirectory, Metrics.Factory metricsFactory) {
@@ -109,7 +111,7 @@ public final class AutoUpdateGeyser {
     }
 
     private void scheduleRestartIfAutoRestart() {
-        if (config.getBoolean("updates.autoRestart")) {
+        if (config.getBoolean("updates.autoRestart") && restartGate.markScheduled()) {
             proxy.sendMessage(Component.text(config.getString("updates.restartMessage")));
             proxy.getScheduler().buildTask(this, () -> {
                 proxy.getCommandManager().executeAsync(proxy.getConsoleCommandSource(), "shutdown");

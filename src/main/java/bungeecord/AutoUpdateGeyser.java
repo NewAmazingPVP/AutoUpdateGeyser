@@ -3,6 +3,7 @@ package bungeecord;
 import common.BuildYml;
 import common.Floodgate;
 import common.Geyser;
+import common.RestartGate;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -28,6 +29,7 @@ public final class AutoUpdateGeyser extends Plugin {
     private boolean configGeyser;
     private boolean configFloodgate;
     private BuildYml buildYml;
+    private final RestartGate restartGate = new RestartGate();
 
     @Override
     public void onEnable() {
@@ -86,7 +88,7 @@ public final class AutoUpdateGeyser extends Plugin {
     }
 
     private void scheduleRestartIfAutoRestart() {
-        if (config.getBoolean("updates.autoRestart")) {
+        if (config.getBoolean("updates.autoRestart") && restartGate.markScheduled()) {
             getProxy().broadcast(ChatColor.translateAlternateColorCodes('&', config.getString("updates.restartMessage")));
             ProxyServer.getInstance().getScheduler().schedule(this, () -> {
                 ProxyServer.getInstance().getPluginManager().dispatchCommand(ProxyServer.getInstance().getConsole(), "end");

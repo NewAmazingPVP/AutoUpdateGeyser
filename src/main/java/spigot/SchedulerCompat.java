@@ -10,6 +10,14 @@ import java.util.function.Consumer;
 
 final class SchedulerCompat {
 
+    interface DelayScheduler {
+        boolean schedule(Plugin plugin, Runnable task, long delaySeconds);
+    }
+
+    interface MainScheduler {
+        void run(Plugin plugin, Runnable task);
+    }
+
     private SchedulerCompat() {
     }
 
@@ -52,36 +60,68 @@ final class SchedulerCompat {
     }
 
     static void scheduleConsoleRestart(Plugin plugin, Runnable task, long delaySeconds) {
+        scheduleConsoleRestart(
+                plugin,
+                task,
+                delaySeconds,
+                SchedulerCompat::schedulePaperAsyncDelay,
+                SchedulerCompat::scheduleThreadDelay,
+                SchedulerCompat::runMain
+        );
+    }
+
+    static void scheduleConsoleRestart(
+            Plugin plugin,
+            Runnable task,
+            long delaySeconds,
+            DelayScheduler realTimeScheduler,
+            DelayScheduler fallbackScheduler,
+            MainScheduler mainScheduler
+    ) {
         Objects.requireNonNull(plugin);
         Objects.requireNonNull(task);
+        Objects.requireNonNull(realTimeScheduler);
+        Objects.requireNonNull(fallbackScheduler);
+        Objects.requireNonNull(mainScheduler);
 
-        if (isFoliaLike()) {
-            try {
-                Object globalScheduler;
-                try {
-                    Method m = Bukkit.class.getMethod("getGlobalRegionScheduler");
-                    globalScheduler = m.invoke(null);
-                } catch (NoSuchMethodException e) {
-                    Method serverGetter = Bukkit.class.getMethod("getServer");
-                    Object server = serverGetter.invoke(null);
-                    Method m = server.getClass().getMethod("getGlobalRegionScheduler");
-                    globalScheduler = m.invoke(server);
-                }
-
-                Method runDelayed = globalScheduler.getClass().getMethod(
-                        "runDelayed",
-                        Plugin.class,
-                        java.util.function.Consumer.class,
-                        long.class
-                );
-                Consumer<Object> consumer = (ignored) -> task.run();
-                runDelayed.invoke(globalScheduler, plugin, consumer, delaySeconds * 20L);
-                return;
-            } catch (Throwable ignored) {
-            }
+        Runnable restartTask = () -> mainScheduler.run(plugin, task);
+        if (realTimeScheduler.schedule(plugin, restartTask, delaySeconds)) {
+            return;
         }
 
-        Bukkit.getScheduler().runTaskLater(plugin, task, delaySeconds * 20L);
+        fallbackScheduler.schedule(plugin, restartTask, delaySeconds);
+    }
+
+    private static boolean schedulePaperAsyncDelay(Plugin plugin, Runnable task, long delaySeconds) {
+        try {
+            Object asyncScheduler = Bukkit.class.getMethod("getAsyncScheduler").invoke(null);
+            Method runDelayed = asyncScheduler.getClass().getMethod(
+                    "runDelayed",
+                    Plugin.class,
+                    java.util.function.Consumer.class,
+                    long.class,
+                    TimeUnit.class
+            );
+            Consumer<Object> consumer = (ignored) -> task.run();
+            runDelayed.invoke(asyncScheduler, plugin, consumer, Math.max(0L, delaySeconds), TimeUnit.SECONDS);
+            return true;
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
+
+    private static boolean scheduleThreadDelay(Plugin plugin, Runnable task, long delaySeconds) {
+        Thread thread = new Thread(() -> {
+            try {
+                TimeUnit.SECONDS.sleep(Math.max(0L, delaySeconds));
+                task.run();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }, "AutoUpdateGeyser-RestartDelay");
+        thread.setDaemon(true);
+        thread.start();
+        return true;
     }
 
     static void runMain(Plugin plugin, Runnable task) {
